@@ -17,4 +17,12 @@ variable "extra_app_settings" {
   default = {}
 }
 
+variable "ip_restriction_ip_address" {
+  default = null
+}
+
+variable "ip_restriction_subnet_id" {
+  default = null
+}
+
 variable "key_vault_id" {}

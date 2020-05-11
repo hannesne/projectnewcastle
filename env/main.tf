@@ -34,6 +34,8 @@ resource "azurerm_cosmosdb_account" "cosmos" {
     failover_priority = 0
   }
 
+  # Default is MongoDB 3.2, use capabilities to enable MongoDB 3.6
+  # https://github.com/terraform-providers/terraform-provider-azurerm/issues/4757
   capabilities {
     name = "EnableMongo"
   }
@@ -77,16 +79,33 @@ resource "azurerm_storage_account" "sa" {
   enable_https_traffic_only = true
 }
 
-# Premium Plan
-resource "azurerm_app_service_plan" "asp" {
-  name                = "${var.project_name}-asp-${var.environment}"
+# Elastic Premium Plan
+resource "azurerm_app_service_plan" "asp_patient_api" {
+  name                = "${var.project_name}-asp-patient-api-${var.environment}"
   resource_group_name = var.project_name
   location            = var.location
   kind                = "elastic"
 
+  # https://docs.microsoft.com/en-us/azure/azure-functions/functions-networking-options#regional-virtual-network-integration
+  # A /26 with 64 addresses accommodates a Premium plan with 30 instances.
+  maximum_elastic_worker_count = 30
+
   sku {
     tier = "ElasticPremium"
     size = "EP1"
+  }
+}
+
+# Consumption Plan
+resource "azurerm_app_service_plan" "asp_audit_api" {
+  name                = "${var.project_name}-asp-audit-api-${var.environment}"
+  resource_group_name = var.project_name
+  location            = var.location
+  kind                = "FunctionApp"
+
+  sku {
+    tier = "Dynamic"
+    size = "Y1"
   }
 }
 
@@ -99,23 +118,91 @@ resource "azurerm_application_insights" "ai" {
   retention_in_days   = 90
 }
 
+# Virtual Network
+resource "azurerm_virtual_network" "vnet" {
+  name                = "${var.project_name}-vnet-${var.environment}"
+  resource_group_name = var.project_name
+  location            = var.location
+  address_space       = ["10.0.0.0/16"]
+}
+
+# Subnet
+resource "azurerm_subnet" "snet" {
+  name                 = "${var.project_name}-snet-${var.environment}"
+  resource_group_name  = var.project_name
+  virtual_network_name = azurerm_virtual_network.vnet.name
+  address_prefixes     = ["10.0.0.0/26"]
+
+  delegation {
+    name = "fadelegation"
+
+    service_delegation {
+      name    = "Microsoft.Web/serverFarms"
+      actions = ["Microsoft.Network/virtualNetworks/subnets/action"]
+    }
+  }
+
+  service_endpoints = ["Microsoft.Web"]
+}
+
 # Function App Module
-# Patient Test API
-module "fa_patient_test_api" {
+# Patient API
+module "fa_patient_api" {
   source                           = "./modules/function_app"
-  name                             = "${var.project_name}-fa-patient-test-api-${var.environment}"
+  name                             = "${var.project_name}-fa-patient-api-${var.environment}"
   resource_group_name              = var.project_name
   location                         = var.location
-  app_service_plan_id              = azurerm_app_service_plan.asp.id
+  app_service_plan_id              = azurerm_app_service_plan.asp_patient_api.id
   storage_account_name             = azurerm_storage_account.sa.name
   storage_account_access_key       = azurerm_storage_account.sa.primary_access_key
   app_insights_instrumentation_key = azurerm_application_insights.ai.instrumentation_key
+  ip_restriction_ip_address        = "${azurerm_api_management.apim.public_ip_addresses[0]}/32"
 
   extra_app_settings = {
     mongo_connection_string = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.cosmos_conn.id})"
   }
 
   key_vault_id = azurerm_key_vault.kv.id
+}
+
+# Audit API
+module "fa_audit_api" {
+  source                           = "./modules/function_app"
+  name                             = "${var.project_name}-fa-audit-api-${var.environment}"
+  resource_group_name              = var.project_name
+  location                         = var.location
+  app_service_plan_id              = azurerm_app_service_plan.asp_audit_api.id
+  storage_account_name             = azurerm_storage_account.sa.name
+  storage_account_access_key       = azurerm_storage_account.sa.primary_access_key
+  app_insights_instrumentation_key = azurerm_application_insights.ai.instrumentation_key
+  ip_restriction_subnet_id         = azurerm_subnet.snet.id
+
+  extra_app_settings = {
+    mongo_connection_string = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.cosmos_conn.id})"
+  }
+
+  key_vault_id = azurerm_key_vault.kv.id
+}
+
+# Regional VNet Integration
+resource "azurerm_app_service_virtual_network_swift_connection" "vnet_int" {
+  app_service_id = module.fa_patient_api.id
+  subnet_id      = azurerm_subnet.snet.id
+}
+
+# API Management
+resource "azurerm_api_management" "apim" {
+  name                = "${var.project_name}-apim-${var.environment}"
+  resource_group_name = var.project_name
+  location            = var.location
+  publisher_name      = var.publisher_name
+  publisher_email     = var.publisher_email
+
+  sku_name = "Developer_1"
+
+  identity {
+    type = "SystemAssigned"
+  }
 }
 
 # Key Vault

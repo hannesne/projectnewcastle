@@ -20,6 +20,13 @@ resource "azurerm_function_app" "fa" {
     var.extra_app_settings
   )
 
+  site_config {
+    ip_restriction {
+      ip_address = var.ip_restriction_ip_address
+      subnet_id  = var.ip_restriction_subnet_id
+    }
+  }
+
   identity {
     type = "SystemAssigned"
   }
