@@ -60,3 +60,16 @@ resource "azurerm_cosmosdb_mongo_collection" "coll_audit" {
   shard_key           = "_shardKey"
   throughput          = 400
 }
+
+# Consumption Plan
+resource "azurerm_app_service_plan" "asp" {
+  name                = "${var.project_name}-asp-${var.environment}"
+  resource_group_name = var.project_name
+  location            = var.location
+  kind                = "FunctionApp"
+
+  sku {
+    tier = "Dynamic"
+    size = "Y1"
+  }
+}
