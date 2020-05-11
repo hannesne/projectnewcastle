@@ -2,15 +2,18 @@ import { PatientFixture } from "./PatientFixture";
 import { Db, MongoClient } from "mongodb";
 import { ISettings } from "../../Models/ISettings";
 import { ICollection } from "../../Services/ICollection";
+import { FileSettings } from "./FileSettings";
 
 export class DBFixture {
   
   public mongoDb: Db;
   public mongoClient: MongoClient;
-  
-  constructor(public settings: ISettings){
+  public settings: ISettings;
+
+  constructor(){
     this.mongoDb = {} as Db;
     this.mongoClient = {} as MongoClient; 
+    this.settings = new FileSettings();
   }
 
   public async init(): Promise<void> {

@@ -4,6 +4,7 @@ import { ISettings } from "../Models/ISettings";
 import { ICollection } from "../Services/ICollection";
 import { PatientDataService } from "../Services/PatientDataService";
 import { EnvironmentSettings } from "../Models/EnvironmentSettings";
+import { RetryCollection } from "../Services/RetryCollection";
 
 export class ControllerFactory {
 
@@ -27,8 +28,9 @@ export class ControllerFactory {
     if (ControllerFactory.mongoDb == null) {
       ControllerFactory.mongoDb = this.createMongoDb();
     }
-    const collection = (await ControllerFactory.mongoDb).collection(collectionName);
-    return collection;
+    const mongoCollection = (await ControllerFactory.mongoDb).collection(collectionName);
+
+    return new RetryCollection(mongoCollection);
   }
 
   private async createMongoDb(): Promise<Db> {

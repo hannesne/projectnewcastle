@@ -2,9 +2,8 @@ import { DBFixture } from "../Fixtures/DBFixture";
 import { PatientDataService } from "../../Services/PatientDataService";
 import { expect } from "chai";
 import { PatientFixture } from "../Fixtures/PatientFixture";
-import { FileSettings } from "../Fixtures/FileSettings";
 
-const db = new DBFixture(new FileSettings());
+const db = new DBFixture();
 
 describe("PatientDataService #integaration", async function (): Promise<void> {
   before(async function (): Promise<void> {
