@@ -25,13 +25,15 @@
     ],
     "rules": {
         "semi": "off",
+        "@typescript-eslint/semi": ["error"],
         "quotes": "off",
         "@typescript-eslint/quotes": ["error", "double"],
         "no-unused-vars": "off",
         "@typescript-eslint/no-unused-vars": [
             "error"
           ],
-        "@typescript-eslint/interface-name-prefix": ["error", { "prefixWithI": "always" } ]
+        "@typescript-eslint/interface-name-prefix": ["error", { "prefixWithI": "always" } ],
+        "@typescript-eslint/no-non-null-assertion": "off"
     },
     "overrides": [
         {
@@ -40,7 +42,8 @@
             "no-unused-expressions": "off",
             "@typescript-eslint/unbound-method": "off",
             "@typescript-eslint/require-await": "off",
-            "@typescript-eslint/no-misused-promises": "off"
+            "@typescript-eslint/no-misused-promises": "off",
+            "@typescript-eslint/no-use-before-define": "off"
           }
         }
       ]

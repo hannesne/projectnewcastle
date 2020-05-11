@@ -4,6 +4,7 @@ import { IResponse } from "../Models/IResponse";
 import { IPatientDataService } from "../Services/IPatientDataService";
 import { SuccessResponse} from "../Models/SuccessResponse";
 import { BadRequestResponse } from "../Models/BadRequestResponse";
+import { v4 as uuidv4 } from "uuid";
 
 export class PatientController {
   public constructor(
@@ -11,7 +12,6 @@ export class PatientController {
   ) {}
 
   public async createPatient(req: HttpRequest): Promise<IResponse> {
-    
     const validationResult = PatientSchema.validate(req.body);
     if (validationResult.error != null) {
       return new BadRequestResponse(validationResult.error.message);
@@ -20,11 +20,18 @@ export class PatientController {
     if (req.body.id != null) {
       return new BadRequestResponse("Id unexpected.");
     }
+    if (req.body.lastUpdated != null) {
+      return new BadRequestResponse("lastUpdated unexpected.");
+    }
+
+    req.body.lastUpdated = new Date();
+
+    
 
     const patient = req.body as IPatient || {};
+    patient.id = uuidv4();
+    await this.patientDataService.insertPatient(patient);
     
-    const id = await this.patientDataService.insertPatient(patient);
-    patient.id = id;
     return new SuccessResponse(patient);
   }
 }

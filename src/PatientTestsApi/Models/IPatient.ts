@@ -12,7 +12,7 @@ export interface IPatient {
   postCode: string;
   insuranceNumber?: string;
   preferredContactNumber?: string;
-  lastUpdated: Date;
+  lastUpdated?: Date;
 }
 
 const maxLengthNameField = 64;
@@ -28,7 +28,7 @@ export const PatientSchema = Joi.object<IPatient>({
   fullName: Joi.string().max(maxLengthFullNameField),
 
   gender: Joi.string()
-    .allow(Gender.male, Gender.female, Gender.other, Gender.unknown)
+    .allow(Gender.Male, Gender.Female, Gender.Other, Gender.Unknown)
     .only()
     .required(),
 
@@ -36,5 +36,5 @@ export const PatientSchema = Joi.object<IPatient>({
   postCode: Joi.string().length(postcodeLength).required(),
   insuranceNumber: Joi.string(),
   preferredContactNumber: Joi.string(),
-  lastUpdated: Joi.date().required(),
+  lastUpdated: Joi.date().optional(),
 });

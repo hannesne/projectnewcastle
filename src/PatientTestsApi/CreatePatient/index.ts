@@ -1,9 +1,11 @@
 import { AzureFunction, Context, HttpRequest } from "@azure/functions";
-import { PatientController } from "../Controllers/PatientController";
-import { PatientDataService } from "../Services/PatientDataService";
+import { ControllerFactory } from "../Controllers/ControllerFactory";
 
-const httpTrigger: AzureFunction = async function (context: Context, req: HttpRequest): Promise<void> {
-  const controller = new PatientController(new PatientDataService());
+
+const controllerFactory = new ControllerFactory();
+
+const httpTrigger: AzureFunction = async function (context: Context, req: HttpRequest): Promise<void> {  
+  const controller = await controllerFactory.createPatientController();
   context.res = await controller.createPatient(req);
 };
 

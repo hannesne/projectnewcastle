@@ -1,25 +1,15 @@
-import { anything, capture, mock, verify, instance, when } from "ts-mockito";
+import { anything, capture, mock, verify, instance } from "ts-mockito";
 import { PatientController } from "../../Controllers/PatientController";
 import { HttpRequest } from "@azure/functions";
 import { IPatientDataService } from "../../Services/IPatientDataService";
-import { Gender } from "../../Models/Gender";
 import { expect } from "chai";
 import { BadRequestResponse } from "../../Models/BadRequestResponse";
 import { v4 as uuidv4 } from "uuid";
+import { PatientFixture } from "../Fixtures/PatientFixture";
 
-const createPatientRequestBody = {
-  firstName: "FirstName",
-  lastName: "LastName",
-  fullName: "FullName",
-  gender: Gender.male,
-  dateOfBirth: "1908-05-23",
-  postCode: "0001",
-  insuranceNumber: "ins0001",
-  preferredContactNumber: "01012345567",
-  lastUpdated: new Date("2020-05-07T04:20:44.454Z")
-}
 
-function createPatientRequest (body: unknown = createPatientRequestBody): HttpRequest {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function createPatientRequest (body: any = PatientFixture.createPatientForCreatingInDb()): HttpRequest {
   return {
     body,
     headers: {},
@@ -40,16 +30,14 @@ function createController (dataService?: IPatientDataService): PatientController
 describe("PatientController", async function (): Promise<void> {
   it("Calls create on the dataservice with a parsed Patient.", async function (): Promise<void> {
     const dataServiceMock = mock<IPatientDataService>();
-    const expectedId = uuidv4();
-    when(dataServiceMock.insertPatient(anything())).thenResolve(expectedId);
     const controller = createController(instance(dataServiceMock));
     const request = createPatientRequest();
 
     const response = await controller.createPatient(request);
 
     verify(dataServiceMock.insertPatient(anything())).once();
-    const [argument] = capture(dataServiceMock.insertPatient).first()
-    expect(argument.id).to.equal(expectedId);
+    const [argument] = capture(dataServiceMock.insertPatient).first();
+    expect(argument.id).is.not.null;
     expect(response.body).is.not.null;
     expect(response.status).is.equal(200);
   });
@@ -66,6 +54,18 @@ describe("PatientController", async function (): Promise<void> {
     expect(response.body).to.equal("Id unexpected.");
   });
 
+  it("Returns Bad request if patient request has lastUpdated.", async function (): Promise<void> {
+    const dataServiceMock = mock<IPatientDataService>();
+    const controller = createController(instance(dataServiceMock));
+    const request = createPatientRequest();
+    request.body.lastUpdated = new Date();
+    
+    const response = await controller.createPatient(request);
+
+    expect(response).to.be.instanceOf(BadRequestResponse);
+    expect(response.body).to.equal("lastUpdated unexpected.");
+  });
+  
   it("Returns Bad request if patient request ca not be parsed.", async function (): Promise<void> {
     const dataServiceMock = mock<IPatientDataService>();
     const controller = createController(instance(dataServiceMock));
