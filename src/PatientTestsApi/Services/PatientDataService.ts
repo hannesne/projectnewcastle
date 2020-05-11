@@ -12,7 +12,7 @@ export class PatientDataService implements IPatientDataService {
     const dbPatient: IDBPatient = {
       ...patient,
       _id: patient.id!,
-      shardKey: patient.id!
+      _shardKey: patient.id!
     };
 
     const result = await this.collection.insertOne(dbPatient);
@@ -27,7 +27,7 @@ export class PatientDataService implements IPatientDataService {
 
 interface IDBPatient extends IPatient {
   _id: string;
-  shardKey: string;
+  _shardKey: string;
 }
 
 

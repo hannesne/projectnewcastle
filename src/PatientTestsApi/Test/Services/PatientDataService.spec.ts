@@ -23,7 +23,7 @@ describe("PatientDataService #integaration", async function (): Promise<void> {
       expect(createdPatient[key]).deep.equal(expectedPatient[key]);
     });
     expect(createdPatient._id).is.equal(id);
-    expect(createdPatient.shardKey).is.equal(id);
+    expect(createdPatient._shardKey).is.equal(id);
   }); 
 
   after(async function (): Promise<void> {

@@ -28,7 +28,7 @@ export class DBFixture {
 
   public async cleanPatients(): Promise<void> {
     await this.mongoDb.collection(this.settings.patientCollection)
-        .deleteOne({ _id: PatientFixture.CreatePatientId, shardKey: PatientFixture.CreatePatientId });
+        .deleteOne({ _id: PatientFixture.CreatePatientId, _shardKey: PatientFixture.CreatePatientId });
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
