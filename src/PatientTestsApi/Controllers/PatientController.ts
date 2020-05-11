@@ -2,7 +2,7 @@ import { HttpRequest } from "@azure/functions";
 import { IPatient, PatientSchema } from "../Models/IPatient";
 import { IResponse } from "../Models/IResponse";
 import { IPatientDataService } from "../Services/IPatientDataService";
-import { SuccessResponse} from "../Models/SuccessResponse";
+import { CreatedResponse} from "../Models/CreatedResponse";
 import { BadRequestResponse } from "../Models/BadRequestResponse";
 import { v4 as uuidv4 } from "uuid";
 
@@ -32,7 +32,7 @@ export class PatientController {
     patient.id = uuidv4();
     await this.patientDataService.insertPatient(patient);
     
-    return new SuccessResponse(patient);
+    return new CreatedResponse(patient);
   }
 }
 

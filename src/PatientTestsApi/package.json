@@ -5,7 +5,8 @@
   "scripts": {
     "test": "mocha --timeout 30000 --allow-uncaught --config .mocharc.json 'dist/Test/**/*.spec.js'",
     "build": "tsc",
-    "clean": "npx rimraf ./dist ./node_modules"
+    "clean": "npx rimraf ./dist ./node_modules",
+    "lint": "npx eslint . --ext .ts"
   },
   "author": "",
   "devDependencies": {

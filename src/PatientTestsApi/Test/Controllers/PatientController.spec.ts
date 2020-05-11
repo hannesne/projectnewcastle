@@ -28,7 +28,7 @@ function createController (dataService?: IPatientDataService): PatientController
 }
 
 describe("PatientController", async function (): Promise<void> {
-  it("Calls create on the dataservice with a parsed Patient.", async function (): Promise<void> {
+  it("Parses the patient and creates it using the dataservice.", async function (): Promise<void> {
     const dataServiceMock = mock<IPatientDataService>();
     const controller = createController(instance(dataServiceMock));
     const request = createPatientRequest();
@@ -39,7 +39,7 @@ describe("PatientController", async function (): Promise<void> {
     const [argument] = capture(dataServiceMock.insertPatient).first();
     expect(argument.id).is.not.null;
     expect(response.body).is.not.null;
-    expect(response.status).is.equal(200);
+    expect(response.status).is.equal(201);
   });
 
   it("Returns Bad request if patient request has an id set.", async function (): Promise<void> {
@@ -65,7 +65,7 @@ describe("PatientController", async function (): Promise<void> {
     expect(response).to.be.instanceOf(BadRequestResponse);
     expect(response.body).to.equal("lastUpdated unexpected.");
   });
-  
+
   it("Returns Bad request if patient request ca not be parsed.", async function (): Promise<void> {
     const dataServiceMock = mock<IPatientDataService>();
     const controller = createController(instance(dataServiceMock));
