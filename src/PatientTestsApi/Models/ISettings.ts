@@ -1,6 +1,6 @@
 export interface ISettings {
   patientCollection: string;
-  patientTestDatabase: string | undefined;
+  patientTestDatabase: string;
   mongoConnectionString: string;
   allowSelfSignedMongoCert: boolean;
 }

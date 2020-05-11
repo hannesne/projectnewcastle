@@ -23,6 +23,7 @@
     "plugins": [
         "@typescript-eslint"
     ],
+    "ignorePatterns": ["/Services/app-insights"],
     "rules": {
         "semi": "off",
         "@typescript-eslint/semi": ["error"],
