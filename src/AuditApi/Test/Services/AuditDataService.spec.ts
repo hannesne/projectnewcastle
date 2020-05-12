@@ -27,6 +27,7 @@ describe("AuditDataService #integration", async function (): Promise<void> {
 
   after(async function (): Promise<void> {
     await db.cleanAuditRecords();
+    await db.close();
   });
 });
 
