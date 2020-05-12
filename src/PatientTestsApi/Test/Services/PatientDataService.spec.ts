@@ -2,11 +2,10 @@ import { DBFixture } from "../Fixtures/DBFixture";
 import { PatientDataService } from "../../Services/PatientDataService";
 import { expect } from "chai";
 import { PatientFixture } from "../Fixtures/PatientFixture";
-import { FileSettings } from "../Fixtures/FileSettings";
 
-const db = new DBFixture(new FileSettings());
+const db = new DBFixture();
 
-describe("PatientDataService #integaration", async function (): Promise<void> {
+describe("PatientDataService #integration", async function (): Promise<void> {
   before(async function (): Promise<void> {
     await db.init();
     await db.cleanPatients();
@@ -28,6 +27,7 @@ describe("PatientDataService #integaration", async function (): Promise<void> {
 
   after(async function (): Promise<void> {
     await db.cleanPatients();
+    await db.close();
   });
 });
 

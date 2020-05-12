@@ -1,4 +1,4 @@
-import { PatientFixture } from "./PatientFixture";
+import { AuditRecordFixture } from "./AuditRecordFixture";
 import { Db, MongoClient } from "mongodb";
 import { ISettings } from "../../Models/ISettings";
 import { ICollection } from "../../Services/ICollection";
@@ -22,21 +22,21 @@ export class DBFixture {
     this.mongoClient = await MongoClient.connect(this.settings.mongoConnectionString,
       { useUnifiedTopology: true, useNewUrlParser: true, tlsAllowInvalidCertificates: true });
     
-    this.mongoDb = this.mongoClient.db(this.settings.patientTestDatabase);
+    this.mongoDb = this.mongoClient.db(this.settings.auditDatabase);
   }
 
-  public createPatientCollection(): ICollection {
-    return this.mongoDb.collection(this.settings.patientCollection);
+  public createAuditCollection(): ICollection {
+    return this.mongoDb.collection(this.settings.auditCollection);
   }
 
-  public async cleanPatients(): Promise<void> {
-    await this.mongoDb.collection(this.settings.patientCollection)
-        .deleteOne({ _id: PatientFixture.CreatePatientId, _shardKey: PatientFixture.CreatePatientId });
+  public async cleanAuditRecords(): Promise<void> {
+    await this.mongoDb.collection(this.settings.auditCollection)
+        .deleteOne({ _id: AuditRecordFixture.CreateAuditRecordId, _shardKey: AuditRecordFixture.CreateAuditRecordId });
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async loadPatient(id: string): Promise<any> {
-    return await this.mongoDb.collection(this.settings.patientCollection).findOne({_id: id});
+  public async loadAuditRecord(id: string): Promise<any> {
+    return await this.mongoDb.collection(this.settings.auditCollection).findOne({_id: id});
   }
 
   public async close(): Promise<void> {
