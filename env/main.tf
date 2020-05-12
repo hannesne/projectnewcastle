@@ -3,6 +3,10 @@ provider "azurerm" {
   features {}
 }
 
+provider "external" {
+  version = "~> 1.2"
+}
+
 terraform {
   backend "azurerm" {}
 }
@@ -184,6 +188,27 @@ module "fa_audit_api" {
   key_vault_id = azurerm_key_vault.kv.id
 }
 
+# Function App Host Key
+# 2020-05-12 Currently azurerm provider does not export function app host keys
+# https://github.com/terraform-providers/terraform-provider-azurerm/issues/699
+# Patient API Host Key
+data "external" "fa_patient_api_host_key" {
+  program = ["bash", "-c", "az rest --method post --uri /subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${var.project_name}/providers/Microsoft.Web/sites/${module.fa_patient_api.name}/host/default/listKeys?api-version=2018-11-01 --query functionKeys"]
+
+  depends_on = [
+    module.fa_patient_api
+  ]
+}
+
+# Audit API Host Key
+data "external" "fa_audit_api_host_key" {
+  program = ["bash", "-c", "az rest --method post --uri /subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${var.project_name}/providers/Microsoft.Web/sites/${module.fa_audit_api.name}/host/default/listKeys?api-version=2018-11-01 --query functionKeys"]
+
+  depends_on = [
+    module.fa_audit_api
+  ]
+}
+
 # Regional VNet Integration
 resource "azurerm_app_service_virtual_network_swift_connection" "vnet_int" {
   app_service_id = module.fa_patient_api.id
@@ -203,6 +228,64 @@ resource "azurerm_api_management" "apim" {
   identity {
     type = "SystemAssigned"
   }
+}
+
+# API Management Backend
+# 2020-05-12 Currently azurerm provider cannot add function app as backend to API Management
+# https://github.com/terraform-providers/terraform-provider-azurerm/issues/5032
+resource "azurerm_api_management_backend" "fa_patient_api" {
+  name                = "fa-patient-api"
+  resource_group_name = azurerm_api_management.apim.resource_group_name
+  api_management_name = azurerm_api_management.apim.name
+  protocol            = "http"
+  url                 = "https://${module.fa_patient_api.default_hostname}"
+  resource_id         = "https://management.azure.com/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${var.project_name}/providers/Microsoft.Web/sites/${module.fa_patient_api.name}"
+}
+
+# API
+resource "azurerm_api_management_api" "helloworld" {
+  name                = "helloworld-api"
+  resource_group_name = azurerm_api_management.apim.resource_group_name
+  api_management_name = azurerm_api_management.apim.name
+  revision            = "1"
+  display_name        = "HelloWorld API"
+  path                = "helloworld"
+  protocols           = ["https"]
+  service_url         = "https://${module.fa_patient_api.default_hostname}/api/HelloWorld"
+}
+
+# API Policy
+resource "azurerm_api_management_api_policy" "helloworld_policy" {
+  api_name            = azurerm_api_management_api.helloworld.name
+  api_management_name = azurerm_api_management_api.helloworld.api_management_name
+  resource_group_name = azurerm_api_management_api.helloworld.resource_group_name
+
+  xml_content = <<XML
+<policies>
+  <inbound>
+    <base />
+    <send-request ignore-error="false" timeout="20" response-variable-name="codeResponse" mode="new">
+      <set-url>${azurerm_key_vault_secret.fa_patient_api_host_key.id}?api-version=7.0</set-url>
+      <set-method>GET</set-method>
+      <authentication-managed-identity resource="https://vault.azure.net" />
+    </send-request>
+    <set-header name="x-functions-key" exists-action="override">
+      <value>@((string)((IResponse)context.Variables["codeResponse"]).Body.As<JObject>()["value"])</value>
+    </set-header>
+  </inbound>
+</policies>
+XML
+}
+
+# API Operation
+resource "azurerm_api_management_api_operation" "helloworld_get" {
+  operation_id        = "helloworld-get"
+  api_name            = azurerm_api_management_api.helloworld.name
+  api_management_name = azurerm_api_management_api.helloworld.api_management_name
+  resource_group_name = azurerm_api_management_api.helloworld.resource_group_name
+  display_name        = "HelloWorld GET"
+  method              = "GET"
+  url_template        = "/"
 }
 
 # Key Vault
@@ -230,10 +313,40 @@ resource "azurerm_key_vault_access_policy" "sp" {
   ]
 }
 
+resource "azurerm_key_vault_access_policy" "apim" {
+  key_vault_id = azurerm_key_vault.kv.id
+  tenant_id    = azurerm_api_management.apim.identity[0].tenant_id
+  object_id    = azurerm_api_management.apim.identity[0].principal_id
+
+  secret_permissions = [
+    "get"
+  ]
+}
+
 # Key Vault Secret
 resource "azurerm_key_vault_secret" "cosmos_conn" {
   name         = "cosmos-conn"
   value        = azurerm_cosmosdb_account.cosmos.connection_strings[0]
+  key_vault_id = azurerm_key_vault.kv.id
+
+  depends_on = [
+    azurerm_key_vault_access_policy.sp
+  ]
+}
+
+resource "azurerm_key_vault_secret" "fa_patient_api_host_key" {
+  name         = "fa-patient-api-host-key"
+  value        = data.external.fa_patient_api_host_key.result.default
+  key_vault_id = azurerm_key_vault.kv.id
+
+  depends_on = [
+    azurerm_key_vault_access_policy.sp
+  ]
+}
+
+resource "azurerm_key_vault_secret" "fa_audit_api_host_key" {
+  name         = "fa-audit-api-host-key"
+  value        = data.external.fa_audit_api_host_key.result.default
   key_vault_id = azurerm_key_vault.kv.id
 
   depends_on = [
