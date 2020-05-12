@@ -1,6 +1,2 @@
-local.settings.json
-node_modules
-dist
-
 # Terraform
 .terraform/
