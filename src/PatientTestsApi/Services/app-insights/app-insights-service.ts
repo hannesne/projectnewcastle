@@ -22,10 +22,15 @@ export interface IDependencyTelemetry {
   target: string;
 }
 
+export interface IAppInsightsService {
+  trackDependency({ data, dependencyTypeName, duration, time, resultCode, success, name, target }: IDependencyTelemetry): void;
+  getHeadersForRequest(): IHeaders;
+}
+
 /**
  * Service wrapper for Azure App Insights
  */
-export class AppInsightsService {
+export class AppInsightsService implements IAppInsightsService {
 
   private readonly correlationContext: CorrelationContext | null;
   private readonly client?: TelemetryClient;

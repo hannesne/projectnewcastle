@@ -2,13 +2,13 @@
 import { ICollection } from "./ICollection";
 import { CollectionInsertOneOptions, InsertOneWriteOpResult } from "mongodb";
 import { Timer } from "./app-insights/timer";
-import { AppInsightsService, IDependencyTelemetry } from "./app-insights/app-insights-service";
+import { IDependencyTelemetry, IAppInsightsService } from "./app-insights/app-insights-service";
 
 export class LoggingCollection implements ICollection {
   
   constructor(
     private readonly collection: ICollection,
-    private readonly appInsights: AppInsightsService,
+    private readonly appInsights: IAppInsightsService,
     private readonly collectionName: string,
     private readonly dbName: string) {}
 
@@ -26,12 +26,14 @@ export class LoggingCollection implements ICollection {
     try {
       const result = await fn();
       timer.stop();
-      this.appInsights.trackDependency(this.createDependency(query, timer, 0, true));
+      const dependency = this.createDependency(query, timer, 0, true);
+      this.appInsights.trackDependency(dependency);
       return result;
 
     } catch (e) {
       timer.stop();
-      this.appInsights.trackDependency(this.createDependency(query, timer, JSON.stringify(e), false));
+      const dependency = this.createDependency(query, timer, JSON.stringify(e, Object.getOwnPropertyNames(e)), false);
+      this.appInsights.trackDependency(dependency);
       throw e;
     }
   }
