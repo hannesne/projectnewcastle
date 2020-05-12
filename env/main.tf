@@ -54,7 +54,7 @@ resource "azurerm_cosmosdb_mongo_database" "mongodb" {
 
 # Cosmos DB Mongo Collection
 resource "azurerm_cosmosdb_mongo_collection" "coll_patient" {
-  name                = "patient"
+  name                = "patients"
   resource_group_name = azurerm_cosmosdb_mongo_database.mongodb.resource_group_name
   account_name        = azurerm_cosmosdb_mongo_database.mongodb.account_name
   database_name       = azurerm_cosmosdb_mongo_database.mongodb.name
@@ -63,7 +63,7 @@ resource "azurerm_cosmosdb_mongo_collection" "coll_patient" {
 }
 
 resource "azurerm_cosmosdb_mongo_collection" "coll_audit" {
-  name                = "audit"
+  name                = "audits"
   resource_group_name = azurerm_cosmosdb_mongo_database.mongodb.resource_group_name
   account_name        = azurerm_cosmosdb_mongo_database.mongodb.account_name
   database_name       = azurerm_cosmosdb_mongo_database.mongodb.name
@@ -264,13 +264,25 @@ resource "azurerm_api_management_api_policy" "helloworld_policy" {
 <policies>
   <inbound>
     <base />
-    <send-request ignore-error="false" timeout="20" response-variable-name="codeResponse" mode="new">
-      <set-url>${azurerm_key_vault_secret.fa_patient_api_host_key.id}?api-version=7.0</set-url>
-      <set-method>GET</set-method>
-      <authentication-managed-identity resource="https://vault.azure.net" />
-    </send-request>
+    <!-- Look for func-host-key in the cache -->
+    <cache-lookup-value key="func-host-key" variable-name="funchostkey" />
+    <!-- If API Management doesn’t find it in the cache, make a request for it and store it -->
+    <choose>
+      <when condition="@(!context.Variables.ContainsKey("funchostkey"))">
+        <!-- Make HTTP request to get function host key -->
+        <send-request ignore-error="false" timeout="20" response-variable-name="coderesponse" mode="new">
+          <set-url>${azurerm_key_vault_secret.fa_patient_api_host_key.id}?api-version=7.0</set-url>
+          <set-method>GET</set-method>
+          <authentication-managed-identity resource="https://vault.azure.net" />
+        </send-request>
+        <!-- Store response body in context variable -->
+        <set-variable name="funchostkey" value="@((string)((IResponse)context.Variables["coderesponse"]).Body.As<JObject>()["value"])" />
+        <!-- Store result in cache -->
+        <cache-store-value key="func-host-key" value="@((string)context.Variables["funchostkey"])" duration="100000" />
+      </when>
+    </choose>
     <set-header name="x-functions-key" exists-action="override">
-      <value>@((string)((IResponse)context.Variables["codeResponse"]).Body.As<JObject>()["value"])</value>
+      <value>@((string)context.Variables["funchostkey"])</value>
     </set-header>
   </inbound>
 </policies>
