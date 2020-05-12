@@ -1,5 +1,5 @@
 import { ICollection } from "../../Services/ICollection";
-import { mock, anything, instance, when, capture, verify } from "ts-mockito";
+import { mock, anything, instance, when, capture } from "ts-mockito";
 import { InsertOneWriteOpResult } from "mongodb";
 import { IAppInsightsService } from "../../Services/app-insights/app-insights-service";
 import { LoggingCollection } from "../../Services/LoggingCollection";
