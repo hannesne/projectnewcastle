@@ -39,4 +39,8 @@ export class DBFixture {
     return await this.mongoDb.collection(this.settings.patientCollection).findOne({_id: id});
   }
 
+  public async close(): Promise<void> {
+    // close the connection
+    await this.mongoClient.close(true);
+  }
 }
