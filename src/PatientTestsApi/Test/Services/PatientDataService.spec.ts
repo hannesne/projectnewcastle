@@ -27,6 +27,7 @@ describe("PatientDataService #integration", async function (): Promise<void> {
 
   after(async function (): Promise<void> {
     await db.cleanPatients();
+    await db.close();
   });
 });
 
