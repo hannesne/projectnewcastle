@@ -4,6 +4,7 @@ import { InsertOneWriteOpResult } from "mongodb";
 import { IAppInsightsService } from "../../Services/app-insights/app-insights-service";
 import { LoggingCollection } from "../../Services/LoggingCollection";
 import { expect } from "chai";
+import { AppInsightsFixture } from "../Fixtures/AppInsightsServiceFixture";
 
 describe("LoggingCollection", async function (): Promise<void> {
   it("Tracks dependencies for succesful database calls", async function(): Promise<void> {
@@ -38,7 +39,7 @@ describe("LoggingCollection", async function (): Promise<void> {
     const expectedErrorString = JSON.stringify(expectedError, Object.getOwnPropertyNames(expectedError));
     when(mockCollection.insertOne(expectedDoc, anything()))
     .thenThrow(expectedError);
-    const mockAppInsightsService = mock<IAppInsightsService>();
+    const mockAppInsightsService = new AppInsightsFixture().createAppInsightsMock();
     const expectedCollectionName = "collectionName";
     const expectedDbName = "dbName";
     const appInsightsService = instance(mockAppInsightsService);
