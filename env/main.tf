@@ -300,6 +300,17 @@ resource "azurerm_api_management_api_operation" "helloworld_get" {
   url_template        = "/"
 }
 
+# API Management Logger
+resource "azurerm_api_management_logger" "logger" {
+  name                = "logger"
+  api_management_name = azurerm_api_management.apim.name
+  resource_group_name = var.project_name
+
+  application_insights {
+    instrumentation_key = azurerm_application_insights.ai.instrumentation_key
+  }
+}
+
 # Key Vault
 resource "azurerm_key_vault" "kv" {
   name                        = "${var.project_name}-kv-${var.environment}"
