@@ -133,8 +133,8 @@ export class HttpDataService {
       time: timer.endDate,
       resultCode,
       success,
-      name: url.hostname,
-      target: url.pathname
+      name: url.pathname,
+      target: url.hostname
     };
   }
 }

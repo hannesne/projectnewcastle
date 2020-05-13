@@ -91,10 +91,10 @@ describe("HttpDataService", () => {
     expect(dependency.data).is.equal("get http://localhost:8080/");
     expect(dependency.dependencyTypeName).is.equal("HTTP");
     expect(dependency.duration).is.greaterThan(0);
-    expect(dependency.name).is.equal("localhost");
+    expect(dependency.target).is.equal("localhost");
     expect(dependency.resultCode).is.equal(200);
     expect(dependency.success).is.equal(true);
-    expect(dependency.target).is.equal("/");
+    expect(dependency.name).is.equal("/");
     verify(appInsightsMock.trackDependency(anything())).once();
   });
 
@@ -111,10 +111,10 @@ describe("HttpDataService", () => {
     expect(dependency.data).is.equal("get http://localhost:8080/");
     expect(dependency.dependencyTypeName).is.equal("HTTP");
     expect(dependency.duration).is.greaterThan(0);
-    expect(dependency.name).is.equal("localhost");
+    expect(dependency.target).is.equal("localhost");
     expect(dependency.resultCode).is.equal(404);
     expect(dependency.success).is.equal(false);
-    expect(dependency.target).is.equal("/");
+    expect(dependency.name).is.equal("/");
     verify(appInsightsMock.trackDependency(anything())).once();
   });
 

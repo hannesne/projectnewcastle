@@ -1,12 +1,13 @@
 import { HttpDataService } from "./HttpDataService";
 import { ISettings } from "../Models/ISettings";
+import { IAuditService } from "./IAuditService";
 
-export class AuditService {
+export class AuditService implements IAuditService {
   constructor(
     private readonly dataService: HttpDataService,
     private readonly settings: ISettings) {}
   
-  async LogAuditRecord(expectedResource: IAuditResource): Promise<void> {
+  public async LogAuditRecord(expectedResource: IAuditResource): Promise<void> {
     if (this.settings.auditAPIUrl){
       const auditRecord: IAuditRecord = { 
         sourceSystemName: "PatientTestApi",
@@ -27,3 +28,4 @@ export interface IAuditResource {
   id: string; 
   operation: string; 
 }
+

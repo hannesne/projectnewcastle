@@ -27,8 +27,8 @@ describe("LoggingCollection", async function (): Promise<void> {
     expect(actualTelemetry.dependencyTypeName).is.equal("mongodb");
     expect(actualTelemetry.resultCode).is.equal(0);
     expect(actualTelemetry.success).is.equal(true);
-    expect(actualTelemetry.name).is.equal(expectedDbName);
-    expect(actualTelemetry.target).is.equal(expectedCollectionName);
+    expect(actualTelemetry.name).is.equal(expectedCollectionName);
+    expect(actualTelemetry.target).is.equal(expectedDbName);
 
   });
 
@@ -52,8 +52,8 @@ describe("LoggingCollection", async function (): Promise<void> {
     expect(actualTelemetry.dependencyTypeName).is.equal("mongodb");
     expect(actualTelemetry.resultCode).is.equal(expectedErrorString);
     expect(actualTelemetry.success).is.equal(false);
-    expect(actualTelemetry.name).is.equal(expectedDbName);
-    expect(actualTelemetry.target).is.equal(expectedCollectionName);
+    expect(actualTelemetry.name).is.equal(expectedCollectionName);
+    expect(actualTelemetry.target).is.equal(expectedDbName);
 
   });
 
