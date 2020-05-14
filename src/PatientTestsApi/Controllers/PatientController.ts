@@ -9,6 +9,7 @@ import { IAuditService } from "../Services/IAuditService";
 import { IAuditResource } from "../Services/AuditService";
 import { AuditingErrorResponse } from "../Models/AuditingErrorResponse";
 import { NotFoundResponse } from "../Models/NotFoundResponse";
+import { ApiResponse } from "../Models/ApiResponse";
 
 export class PatientController {
   public constructor(
@@ -58,9 +59,12 @@ export class PatientController {
     patient.id = newPatientId;
     patient.lastUpdated = new Date();
     */
-    // await this.patientDataService.insertPatient(patient);
+    const patient: IPatient = await this.patientDataService.findPatient(registrationId);
     
-    return new NotFoundResponse("not found");
+    if (!patient)
+      return new NotFoundResponse("not found");
+    else
+      return new ApiResponse(patient);
   }
 
   private createAuditResource(newPatientId: string, operation: string): IAuditResource {

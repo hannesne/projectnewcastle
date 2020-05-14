@@ -6,7 +6,7 @@ const controllerFactory = new ControllerFactory();
 
 const httpTrigger: AzureFunction = async function (context: Context, req: HttpRequest): Promise<void> {  
   const controller = await controllerFactory.createPatientController(context.traceContext, req);
-  context.res = await controller.createPatient(req);
+  context.res = await controller.findPatient(req);
 };
 
 export default httpTrigger;
