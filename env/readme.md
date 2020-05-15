@@ -1,16 +1,12 @@
 # Deploying the environment using teraform
 
 ## Prerequisites
+- Terraform
+- Node 12
+- Azure CLI
+- Azure functions CLI v3
 
-### Install Node 12
-Use nvm (Node Version Manager) as described [here](https://nodejs.org/en/download/package-manager/#nvm) 
-
-On Debian \ Ubuntu:
-
-```bash
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
-nvm install lts/erbium
-```
+This project includes a [dev container](https://code.visualstudio.com/docs/remote/containers), with the prerequisites installed.
 
 ### Install terraform 
 Download the latest binary for your platform from [here](https://www.terraform.io/downloads.html)
@@ -22,6 +18,15 @@ sudo apt-get install unzip
 wget https://releases.hashicorp.com/terraform/0.12.25/terraform_0.12.25_linux_amd64.zip
 unzip terraform_0.12.25_linux_amd64.zip
 sudo mv terraform /usr/local/bin/
+```
+### Install Node 12
+Use nvm (Node Version Manager) as described [here](https://nodejs.org/en/download/package-manager/#nvm) 
+
+On Debian \ Ubuntu:
+
+```bash
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
+nvm install lts/erbium
 ```
 
 ### Install Azure CLI

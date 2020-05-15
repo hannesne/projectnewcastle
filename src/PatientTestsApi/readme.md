@@ -7,7 +7,7 @@
 
 This project includes a [dev container](https://code.visualstudio.com/docs/remote/containers), with the prerequisites installed.
 
-Copy the contents of `template.settings.json` to a file in the root folder called `local.settings.json`. This is where you will keep all the settings used for running the app locally.
+Copy the contents of `template.settings.json` to a file in the root folder called `local.settings.json`. This is where you will keep all the settings used for running the app locally. If you are running in a dev container, remember to replace all references to `localhost` in your settings with `host.docker.internal`
 
 ## Mongodb 
 You'll need a mongodb to use to store data:
