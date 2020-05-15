@@ -21,7 +21,7 @@ export class LoggingCollection implements ICollection {
   }
 
   public async findOne(filter: FilterQuery<any>, options?: FindOneOptions): Promise<any> {
-    const mongoRequest = JSON.stringify({filter});
+    const mongoRequest = JSON.stringify({findOne: {filter}});
     return this.trackDependency(() => this.collection.findOne(filter, options), mongoRequest);
   }
 

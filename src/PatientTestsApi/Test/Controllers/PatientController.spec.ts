@@ -130,8 +130,9 @@ describe("PatientController", async function (): Promise<void> {
     const controller = createController(instance(dataServiceMock));
     const request = createEmptyRequest();
     
-    const response = await controller.findPatient(request);
-    expect(response).to.be.instanceOf(BadRequestResponse);
+    const result = await controller.findPatient(request);
+    expect(result).to.be.instanceOf(BadRequestResponse);
+    expect(result.body).to.equal("Missing registration id");
   });
 
   it("Returns NotFound if patient is not found.", async function (): Promise<void> {
@@ -143,10 +144,11 @@ describe("PatientController", async function (): Promise<void> {
     request.params['registration-id'] = '0';
 
     // response
-    when(dataServiceMock.findPatient(anything())).thenThrow(new NotFoundResponse(""));
+    when(dataServiceMock.findPatient(anything())).thenResolve(null);
     
-    expect(controller.findPatient(request))
-      .to.eventually.be.rejected.and.be.an.instanceOf(NotFoundResponse);
+    const result = await controller.findPatient(request);
+    expect(result).to.be.an.instanceOf(NotFoundResponse);
+    expect(result.body).to.equal("Patient not found")
   });
 
   it("Returns a patient with the right id.", async function (): Promise<void> {

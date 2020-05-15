@@ -48,7 +48,7 @@ export class PatientController {
     const registrationId = req.params['registration-id'];
 
     if (!registrationId || registrationId.length === 0) {
-      return new BadRequestResponse("Missing registration id.");
+      return new BadRequestResponse("Missing registration id");
     }
    
     try {
@@ -57,10 +57,10 @@ export class PatientController {
       return new AuditingErrorResponse(error);
     }
     
-    const patient: IPatient = await this.patientDataService.findPatient(registrationId);
+    const patient: IPatient | null = await this.patientDataService.findPatient(registrationId);
     
     if (!patient)
-      return new NotFoundResponse("not found");
+      return new NotFoundResponse("Patient not found");
     else
       return new ApiResponse(patient);
   }

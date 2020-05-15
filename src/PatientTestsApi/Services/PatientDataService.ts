@@ -24,10 +24,15 @@ export class PatientDataService implements IPatientDataService {
     }
   }
 
-  public async findPatient(id: string): Promise<IPatient> {
+  public async findPatient(id: string): Promise<IPatient | null> {
     const filter = { id };
-    console.info('Query is ' + JSON.stringify(filter));
     const result: IPatient = await this.collection.findOne(filter) as IPatient;
+
+    if (result) {
+      // remove database properties
+      delete result._id;
+      delete result._shardKey;
+    }
 
     return result;
   }
