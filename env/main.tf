@@ -278,10 +278,14 @@ resource "azurerm_api_management_logger" "logger" {
 # API Management Diagnostic
 # 2020-05-13 Cannot work due to following issue
 # https://github.com/terraform-providers/terraform-provider-azurerm/issues/6619
+# The fix will be available in v2.10 of teh Azure provider. 
+# Workaround: Open APIManagement in the portal, select the Patient API in the API list, 
+# open it's settings and set app insights to the logger instance.
 # resource "azurerm_api_management_diagnostic" "diagnostic" {
 #   identifier          = "applicationinsights"
 #   resource_group_name = var.project_name
 #   api_management_name = azurerm_api_management.apim.name
+#   api_management_logger_id =  azurerm_api_management_logger.logger.id 
 # }
 
 # API Management Backend
