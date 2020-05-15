@@ -47,18 +47,16 @@ export class PatientController {
   public async findPatient(req: HttpRequest): Promise<IResponse> {
     const registrationId = req.params['registration-id'];
 
-    if (registrationId === null || registrationId.length === 0) {
+    if (!registrationId || registrationId.length === 0) {
       return new BadRequestResponse("Missing registration id.");
     }
    
-    /*try {
-      await this.auditService.LogAuditRecord(this.createAuditResource(newPatientId, "create"));
+    try {
+      await this.auditService.LogAuditRecord(this.createAuditResource(registrationId, "find"));
     } catch (error) {
       return new AuditingErrorResponse(error);
     }
-    patient.id = newPatientId;
-    patient.lastUpdated = new Date();
-    */
+    
     const patient: IPatient = await this.patientDataService.findPatient(registrationId);
     
     if (!patient)

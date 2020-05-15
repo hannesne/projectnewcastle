@@ -11,11 +11,10 @@ import { IPatient } from "../../Models/IPatient";
 import { DownstreamError } from "../../Models/DownstreamError";
 import * as HttpStatus from "http-status-codes";
 import { AuditingErrorResponse } from "../../Models/AuditingErrorResponse";
-
-
+import { NotFoundResponse } from "../../Models/NotFoundResponse";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function createPatientRequest (body: any = PatientFixture.createPatientForCreatingInDb()): HttpRequest {
+function createPatientRequest(body: any = PatientFixture.createPatientForCreatingInDb()): HttpRequest {
   return {
     body,
     headers: {},
@@ -26,7 +25,17 @@ function createPatientRequest (body: any = PatientFixture.createPatientForCreati
   };
 }
 
-function createController (dataService?: IPatientDataService, auditService?: IAuditService): PatientController {
+function createEmptyRequest(): HttpRequest {
+  return {
+    method: "GET",
+    url: "",
+    headers: {},
+    query: {},
+    params: {}
+  };
+}
+
+function createController(dataService?: IPatientDataService, auditService?: IAuditService): PatientController {
   if (!dataService) {
     dataService = mock<IPatientDataService>();
   }
@@ -80,7 +89,6 @@ describe("PatientController", async function (): Promise<void> {
     const controller = createController(instance(dataServiceMock));
     const request = createPatientRequest({});
     
-    
     const response = await controller.createPatient(request);
 
     expect(response).to.be.instanceOf(BadRequestResponse);
@@ -115,5 +123,47 @@ describe("PatientController", async function (): Promise<void> {
     verify(patientDataServiceMock.insertPatient(anything())).never();
     expect(response).to.be.instanceOf(AuditingErrorResponse);
     expect(response.body).to.match(/^Error creating audit log:/i);
+  });
+
+  it("Returns BadRequest if patient id not passed in.", async function (): Promise<void> {
+    const dataServiceMock = mock<IPatientDataService>();
+    const controller = createController(instance(dataServiceMock));
+    const request = createEmptyRequest();
+    
+    const response = await controller.findPatient(request);
+    expect(response).to.be.instanceOf(BadRequestResponse);
+  });
+
+  it("Returns NotFound if patient is not found.", async function (): Promise<void> {
+    const dataServiceMock = mock<IPatientDataService>();
+    const controller = createController(instance(dataServiceMock));
+    const request = createEmptyRequest();
+
+    // configure request
+    request.params['registration-id'] = '0';
+
+    // response
+    when(dataServiceMock.findPatient(anything())).thenThrow(new NotFoundResponse(""));
+    
+    expect(controller.findPatient(request))
+      .to.eventually.be.rejected.and.be.an.instanceOf(NotFoundResponse);
+  });
+
+  it("Returns a patient with the right id.", async function (): Promise<void> {
+    const dataServiceMock = mock<IPatientDataService>();
+    const controller = createController(instance(dataServiceMock));
+    const request = createEmptyRequest();
+
+    // configure request
+    request.params['registration-id'] = '1';
+
+    // response
+    const patient = PatientFixture.createPatient();
+    when(dataServiceMock.findPatient(anything())).thenResolve(patient);
+    
+    const result = await controller.findPatient(request);
+    const patientResult = result.body as IPatient;
+    expect(result.status).to.equal(HttpStatus.OK);
+    expect(patientResult.id).to.equal(PatientFixture.CreatePatientId);
   });
 });
