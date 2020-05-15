@@ -81,8 +81,28 @@ Download and configure the Terraform providers by running:
 terraform init -backend-config="storage_account_name=$TERRAFORM_SA" -backend-config="container_name=$TERRAFORM_CONTAINER" -backend-config="key=$ENVIRONMENT.terraform.tfstate" -backend-config="resource_group_name=$RESOURCE_GROUP"
 ```
 These commands may take a while to respond - be patient.
-Now deploy your environment by applying the terraform configuration:
 
+Login so that external scripts can run using the Service Principal:
+```bash
+az login  --service-principal -u $ARM_CLIENT_ID -p $ARM_CLIENT_SECRET --tenant $ARM_TENANT_ID
+```
+
+Now deploy your environment by applying the terraform configuration:
 ```bash
 terraform apply -input=false -auto-approve -var-file="vars/$ENVIRONMENT.tfvars" -var "project_name=$RESOURCE_GROUP"
+```
+
+Test your setup by making a POST request with the below body to https://{$RESOURCE_GROUP}-apim-dev.azure-api.net/patient/
+
+```json
+{
+  "firstName": "FirstName",
+  "lastName": "LastName",
+  "fullName": "FullName",
+  "gender": "male",
+  "dateOfBirth": "1908-05-23",
+  "postCode": "0001",
+  "insuranceNumber": "ins0001",
+  "preferredContactNumber": "01012345567"
+}
 ```

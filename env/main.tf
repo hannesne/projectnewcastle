@@ -172,6 +172,22 @@ module "fa_patient_api" {
   key_vault_id = azurerm_key_vault.kv.id
 }
 
+resource "null_resource" "deploy_patient_api" {
+  triggers = {
+        build_number = "${timestamp()}"
+  }
+  provisioner "local-exec" {
+    command = "npm run build:production && func azure functionapp publish ${module.fa_patient_api.name}"
+    working_dir = "../src/PatientTestsApi"
+    interpreter = ["bash", "-c"]
+  }
+  depends_on = [
+    module.fa_patient_api
+  ]
+}
+
+
+
 # Audit API
 module "fa_audit_api" {
   source                           = "./modules/function_app"
@@ -190,6 +206,20 @@ module "fa_audit_api" {
   }
 
   key_vault_id = azurerm_key_vault.kv.id
+}
+
+resource "null_resource" "deploy_audit_api" {
+  triggers = {
+        build_number = "${timestamp()}"
+  }
+  provisioner "local-exec" {
+    command = "npm run build:production && func azure functionapp publish ${module.fa_audit_api.name}"
+    working_dir = "../src/AuditApi"
+    interpreter = ["bash", "-c"]
+  }
+  depends_on = [
+    module.fa_audit_api
+  ]
 }
 
 # Function App Host Key
