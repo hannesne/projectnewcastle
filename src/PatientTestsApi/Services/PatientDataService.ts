@@ -2,6 +2,7 @@ import { IPatientDataService } from "./IPatientDataService";
 import { IPatient } from "../Models/IPatient";
 import { ICollection } from "./ICollection";
 import { InsertFailedError } from "../Models/InsertFailedError";
+import { UpdateFailedError } from "../Models/UpdateFailedError";
 
 export class PatientDataService implements IPatientDataService {
   constructor (private readonly collection: ICollection) {
@@ -56,7 +57,7 @@ export class PatientDataService implements IPatientDataService {
       return patient.id!;
     }
     else {
-      return null;
+      throw new UpdateFailedError();
     }
   }
 }
