@@ -45,11 +45,11 @@ export class PatientDataService implements IPatientDataService {
       _shardKey: patient.id!
     };
 
-    const filter = { _id: dbPatient._id, shardKey: dbPatient._shardKey };
+    const filter = { _id: dbPatient._id, _shardKey: dbPatient._shardKey };
     const result = await this.collection.updateOne(
       filter,
       {
-        $set: dbPatient
+        $set: patient
       }
     );
 
