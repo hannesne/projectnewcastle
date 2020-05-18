@@ -6,7 +6,7 @@
       "direction": "in",
       "name": "req",
       "methods": [
-        "get"
+        "put"
       ],
       "route": "patient/{registration-id}"
     },
@@ -16,5 +16,5 @@
       "name": "res"
     }
   ],
-  "scriptFile": "../dist/LoadPatient/index.js"
+  "scriptFile": "../dist/UpdatePatient/index.js"
 }

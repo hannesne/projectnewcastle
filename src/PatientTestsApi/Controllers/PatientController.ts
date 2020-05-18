@@ -65,6 +65,42 @@ export class PatientController {
       return new ApiResponse(patient);
   }
 
+  public async updatePatient(req: HttpRequest): Promise<IResponse> {
+    const validationResult = PatientSchema.validate(req.body);
+    const registrationId = req.params['registration-id'];
+
+    if (validationResult.error != null) {
+      return new BadRequestResponse(validationResult.error.message);
+    }
+
+    if (req.body.id == null) {
+      return new BadRequestResponse("Missing ID parameter in request body");
+    }
+
+    if (registrationId == null || registrationId.length == 0) {
+      return new BadRequestResponse("Missing ID parameter in the URL");
+    }
+
+    // Check if two registration IDs (in URL and data body) exist and are equal
+    if (!(registrationId != req.body.id)) {
+      throw new BadRequestResponse('Inconsistent registration IDs');
+    }
+    
+    const patient = req.body as IPatient || {};
+    
+    /*
+    try {
+      await this.auditService.LogAuditRecord(this.createAuditResource(newPatientId, "create"));
+    } catch (error) {
+      return new AuditingErrorResponse(error);
+    }*/
+
+    patient.lastUpdated = new Date();
+    // await this.patientDataService.updatePatient(patient);
+    
+    return new ApiResponse(patient);
+  }
+
   private createAuditResource(newPatientId: string, operation: string): IAuditResource {
     return { 
       id: newPatientId,
