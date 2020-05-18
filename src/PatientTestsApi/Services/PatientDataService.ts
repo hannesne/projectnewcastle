@@ -13,7 +13,8 @@ export class PatientDataService implements IPatientDataService {
     const dbPatient: IDBPatient = {
       ...patient,
       _id: patient.id!,
-      _shardKey: patient.id!
+      _shardKey: patient.id!,
+      _dateOfBirthDate: new Date(patient.dateOfBirth)
     };
 
     const result = await this.collection.insertOne(dbPatient);
@@ -33,6 +34,7 @@ export class PatientDataService implements IPatientDataService {
       // remove database properties
       delete result._id;
       delete result._shardKey;
+      delete result._dateOfBirthDate;
     }
 
     return result;
@@ -42,7 +44,8 @@ export class PatientDataService implements IPatientDataService {
     const dbPatient: IDBPatient = {
       ...patient,
       _id: patient.id!,
-      _shardKey: patient.id!
+      _shardKey: patient.id!,
+      _dateOfBirthDate: new Date(patient.dateOfBirth)
     };
 
     const filter = { _id: dbPatient._id, _shardKey: dbPatient._shardKey };
@@ -65,6 +68,7 @@ export class PatientDataService implements IPatientDataService {
 interface IDBPatient extends IPatient {
   _id: string;
   _shardKey: string;
+  _dateOfBirthDate: Date;  
 }
 
 

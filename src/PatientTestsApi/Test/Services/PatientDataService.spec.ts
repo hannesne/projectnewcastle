@@ -46,6 +46,7 @@ describe("PatientDataService #integration", async function (): Promise<void> {
     // assert db properties haven't leaked
     expect(foundPatient!._id).to.be.undefined;
     expect(foundPatient!._shardKey).to.be.undefined;
+    expect(foundPatient!._dateOfBirthDate).to.be.undefined;
   });
   
   it("Can create and update a patient", async function (): Promise<void> {
