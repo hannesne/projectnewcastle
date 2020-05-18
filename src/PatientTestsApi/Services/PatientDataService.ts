@@ -36,6 +36,29 @@ export class PatientDataService implements IPatientDataService {
 
     return result;
   }
+
+  public async updatePatient(patient: IPatient): Promise<string | null> {
+    const dbPatient: IDBPatient = {
+      ...patient,
+      _id: patient.id!,
+      _shardKey: patient.id!
+    };
+
+    const filter = { _id: dbPatient._id, shardKey: dbPatient._shardKey };
+    const result = await this.collection.updateOne(
+      filter,
+      {
+        $set: dbPatient
+      }
+    );
+
+    if (result.modifiedCount > 0) {
+      return patient.id!;
+    }
+    else {
+      return null;
+    }
+  }
 }
 
 interface IDBPatient extends IPatient {
