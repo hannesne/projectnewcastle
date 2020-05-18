@@ -15,7 +15,6 @@ export interface IPatient {
   lastUpdated?: Date;
 }
 
-/*
 export interface IPatientSearch {
   [key: string]: unknown;
   id?: string;
@@ -23,13 +22,12 @@ export interface IPatientSearch {
   lastName?: string;
   fullName?: string;
   gender?: Gender;
-  dateOfBirth: string;
-  postCode: string;
+  dateOfBirthFrom?: Date;
+  dateOfBirthTo?: Date;
+  postCode?: string;
   insuranceNumber?: string;
   preferredContactNumber?: string;
-  lastUpdated?: Date;
 }
-*/
 
 const maxLengthNameField = 64;
 const maxLengthFullNameField = 128;
