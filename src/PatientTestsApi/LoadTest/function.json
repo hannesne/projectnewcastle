@@ -1,14 +1,14 @@
 {
   "bindings": [
     {
-      "authLevel": "anonymous",
+      "authLevel": "function",
       "type": "httpTrigger",
       "direction": "in",
       "name": "req",
       "methods": [
         "get"
       ],
-      "route": "patient/{patientId}"
+      "route": "patient/{patientId:guid}/tests/{testId:guid?}"
     },
     {
       "type": "http",
@@ -16,5 +16,5 @@
       "name": "res"
     }
   ],
-  "scriptFile": "../dist/UpdatePatient/index.js"
+  "scriptFile": "../dist/LoadTest/index.js"
 }

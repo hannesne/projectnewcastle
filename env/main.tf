@@ -183,7 +183,7 @@ module "fa_patient_api" {
 
 resource "null_resource" "deploy_patient_api" {
   triggers = {
-        build_number = "${timestamp()}"
+        build_number = var.build_id
   }
   provisioner "local-exec" {
     command = "npm run build:production && func azure functionapp publish ${module.fa_patient_api.name}"
@@ -219,7 +219,7 @@ module "fa_audit_api" {
 
 resource "null_resource" "deploy_audit_api" {
   triggers = {
-        build_number = "${timestamp()}"
+        build_number = var.build_id
   }
   provisioner "local-exec" {
     command = "npm run build:production && func azure functionapp publish ${module.fa_audit_api.name}"
@@ -389,11 +389,26 @@ resource "azurerm_api_management_api_operation" "test_create" {
   resource_group_name = azurerm_api_management_api.patient.resource_group_name
   display_name        = "Create Test"
   method              = "POST"
-  url_template        = "/{patientId}/test"
+  url_template        = "/{patientId}/tests"
   template_parameter  {
     name  = "patientId"
     required = true
     type = "string"
+  }
+}
+
+resource "azurerm_api_management_api_operation" "tests_load" {
+  operation_id        = "tests-load"
+  api_name            = azurerm_api_management_api.patient.name
+  api_management_name = azurerm_api_management_api.patient.api_management_name
+  resource_group_name = azurerm_api_management_api.patient.resource_group_name
+  display_name        = "Load Tests"
+  method              = "GET"
+  url_template        = "/{patientId}/tests/*"
+  template_parameter  {
+    name  = "patientId"
+    required = true
+    type = "guid"
   }
 }
 
