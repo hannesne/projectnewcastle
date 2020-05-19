@@ -371,7 +371,7 @@ resource "azurerm_api_management_api_operation" "patient_load" {
   template_parameter {
     name     = "patientId"
     required = true
-    type     = "string"
+    type     = "guid"
   }
 }
 
@@ -387,7 +387,7 @@ resource "azurerm_api_management_api_operation" "patient_update" {
   template_parameter {
     name     = "patientId"
     required = true
-    type     = "string"
+    type     = "guid"
   }
 }
 
@@ -402,7 +402,7 @@ resource "azurerm_api_management_api_operation" "test_create" {
   template_parameter  {
     name  = "patientId"
     required = true
-    type = "string"
+    type = "guid"
   }
 }
 
