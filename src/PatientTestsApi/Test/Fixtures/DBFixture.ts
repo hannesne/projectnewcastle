@@ -1,6 +1,6 @@
-import { Db, MongoClient, Collection, FilterQuery, FindOneOptions } from "mongodb";
+import { Db, MongoClient } from "mongodb";
 import { ISettings } from "../../Models/ISettings";
-import { ICollection } from "../../Services/ICollection";
+import { ICollection, patchMongoCollection } from "../../Services/ICollection";
 import { FileSettings } from "./FileSettings";
 
 export class DBFixture {
@@ -37,16 +37,11 @@ export class DBFixture {
   }
   
   public createTestCollection(): ICollection {
-    const mongoCollection = this.createCollection(this.settings.testCollection);
-    return mongoCollection;
+    return this.createCollection(this.settings.testCollection);
   }
 
   private createCollection(collectionName: string): ICollection {
-    const mongoCollection = this.mongoDb.collection(collectionName) as unknown as ICollection & Collection<any>;
-    mongoCollection.findMany = function (query: FilterQuery<any>, options?: FindOneOptions | undefined): Promise<any[]> {
-      return this.find(query, options).toArray();
-    };
-    return mongoCollection;
+    return patchMongoCollection(this.mongoDb.collection(collectionName));
   }
 
   public async cleanTests(): Promise<void> {
