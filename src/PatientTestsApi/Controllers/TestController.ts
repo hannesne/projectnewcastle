@@ -50,7 +50,7 @@ export class TestController {
     if (!request.params.patientId) {
       return Promise.resolve(new BadRequestResponse("patientId not specified."));
     }
-    const tests = await this.testDataService.loadTests(request.params.patientId, request.params.testId);
+    const tests = await this.testDataService.findTests(request.params.patientId, request.params.testId);
     if (tests == null) {
       return new NotFoundResponse("Test not found.");
     }

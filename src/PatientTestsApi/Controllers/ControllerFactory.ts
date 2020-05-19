@@ -1,5 +1,5 @@
 import { PatientController } from "./PatientController";
-import { Db, MongoClient } from "mongodb";
+import { Db, MongoClient, FilterQuery, FindOneOptions, Collection } from "mongodb";
 import { ISettings } from "../Models/ISettings";
 import { ICollection } from "../Services/ICollection";
 import { PatientDataService } from "../Services/PatientDataService";
@@ -48,7 +48,11 @@ export class ControllerFactory {
     if (ControllerFactory.mongoDb == null) {
       ControllerFactory.mongoDb = this.createMongoDb();
     }
-    const mongoCollection = (await ControllerFactory.mongoDb).collection(collectionName);
+    const mongoCollection = (await ControllerFactory.mongoDb).collection(collectionName) as unknown as ICollection & Collection<any>;
+        
+    mongoCollection.findMany = function (query: FilterQuery<any>, options?: FindOneOptions | undefined): Promise<any[]> {
+      return this.find(query, options).toArray();
+    };
 
     const retryCollection = new RetryCollection(mongoCollection);
     return new LoggingCollection(retryCollection, appInsightsService, collectionName, this.settings.patientTestDatabase);

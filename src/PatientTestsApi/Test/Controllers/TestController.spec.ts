@@ -43,7 +43,7 @@ function createGetRequest(params = {}): HttpRequest {
 function createController(dataService?: ITestDataService, auditService?: IAuditService): TestController {
   if (!dataService) {
     dataService = mock<ITestDataService>();
-    when(dataService.loadTests(anything(), anything())).thenResolve([TestFixture.createTest()]);
+    when(dataService.findTests(anything(), anything())).thenResolve([TestFixture.createTest()]);
   }
   if (!auditService) {
     auditService = mock<IAuditService>();
@@ -145,7 +145,7 @@ describe("TestController", async function (): Promise<void> {
     const dataServiceMock = mock<ITestDataService>();
     const patientId = uuidv4();
     const expectedTests = TestFixture.createTests([uuidv4(), uuidv4()]);
-    when(dataServiceMock.loadTests(patientId, undefined)).thenResolve(expectedTests);
+    when(dataServiceMock.findTests(patientId, undefined)).thenResolve(expectedTests);
     const controller = createController(instance(dataServiceMock));
     const request = createGetRequest({patientId});
     
@@ -160,7 +160,7 @@ describe("TestController", async function (): Promise<void> {
     const patientId = uuidv4();
     const testId = uuidv4();
     const expectedTests = [TestFixture.createTest()];
-    when(dataServiceMock.loadTests(patientId, testId)).thenResolve(expectedTests);
+    when(dataServiceMock.findTests(patientId, testId)).thenResolve(expectedTests);
     const controller = createController(instance(dataServiceMock));
     const request = createGetRequest({patientId, testId});
     
@@ -174,7 +174,7 @@ describe("TestController", async function (): Promise<void> {
     const dataServiceMock = mock<ITestDataService>();
     const patientId = uuidv4();
     const testId = uuidv4();
-    when(dataServiceMock.loadTests(patientId, testId)).thenResolve(null);
+    when(dataServiceMock.findTests(patientId, testId)).thenResolve(null);
     const controller = createController(instance(dataServiceMock));
     const request = createGetRequest({patientId, testId});
     
@@ -189,7 +189,7 @@ describe("TestController", async function (): Promise<void> {
     const testId = uuidv4();
     const request = createGetRequest({patientId, testId});
     const dataServiceMock = mock<ITestDataService>();
-    when(dataServiceMock.loadTests(patientId, testId)).thenResolve(TestFixture.createTests([testId]));
+    when(dataServiceMock.findTests(patientId, testId)).thenResolve(TestFixture.createTests([testId]));
     const controller = createController(instance(dataServiceMock), instance(auditServiceMock));
     
     await controller.loadTests(request);
@@ -207,7 +207,7 @@ describe("TestController", async function (): Promise<void> {
     const expectedTests = TestFixture.createTests([uuidv4(), uuidv4()]);
     const patientId = uuidv4();
     const dataServiceMock = mock<ITestDataService>();
-    when(dataServiceMock.loadTests(patientId, undefined)).thenResolve(expectedTests);
+    when(dataServiceMock.findTests(patientId, undefined)).thenResolve(expectedTests);
 
     const controller = createController(instance(dataServiceMock), instance(auditServiceMock));
     const request = createGetRequest({patientId});

@@ -4,4 +4,5 @@ import { CollectionInsertOneOptions, InsertOneWriteOpResult, FilterQuery, FindOn
 export interface ICollection {
   insertOne(docs: any, options?: CollectionInsertOneOptions): Promise<InsertOneWriteOpResult<any>>;
   findOne(filter: FilterQuery<any>, options?: FindOneOptions): Promise<any>;
+  findMany(query: FilterQuery<any>, options?: FindOneOptions): Promise<any[]>;
 }

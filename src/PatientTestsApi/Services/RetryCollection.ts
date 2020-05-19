@@ -6,8 +6,8 @@ import { DefaultRetryPolicy } from "./DefaultRetryPolicy";
 
 export class RetryCollection implements ICollection {
   constructor(private readonly collection: ICollection) {}
-
-  insertOne(
+  
+  public async insertOne(
     docs: any,
     options?: CollectionInsertOneOptions | undefined
   ): Promise<InsertOneWriteOpResult<any>> {
@@ -19,6 +19,12 @@ export class RetryCollection implements ICollection {
   public async findOne(filter: FilterQuery<any>, options?: FindOneOptions): Promise<any> {
     return this.retryWrapper(
       async(): Promise<any> => this.collection.findOne(filter, options)
+    );
+  }
+
+  public async findMany(query: FilterQuery<any>, options?: FindOneOptions | undefined): Promise<any[]> {
+    return this.retryWrapper(
+      async (): Promise<any[]> => this.collection.findMany(query, options)
     );
   }
   

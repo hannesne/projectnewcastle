@@ -1,4 +1,4 @@
-import { Db, MongoClient } from "mongodb";
+import { Db, MongoClient, Collection, FilterQuery, FindOneOptions } from "mongodb";
 import { ISettings } from "../../Models/ISettings";
 import { ICollection } from "../../Services/ICollection";
 import { FileSettings } from "./FileSettings";
@@ -24,7 +24,7 @@ export class DBFixture {
   }
 
   public createPatientCollection(): ICollection {
-    return this.mongoDb.collection(this.settings.patientCollection);
+    return this.createCollection(this.settings.patientCollection);
   }
 
   public async cleanPatients(): Promise<void> {
@@ -37,7 +37,16 @@ export class DBFixture {
   }
   
   public createTestCollection(): ICollection {
-    return this.mongoDb.collection(this.settings.testCollection);
+    const mongoCollection = this.createCollection(this.settings.testCollection);
+    return mongoCollection;
+  }
+
+  private createCollection(collectionName: string): ICollection {
+    const mongoCollection = this.mongoDb.collection(collectionName) as unknown as ICollection & Collection<any>;
+    mongoCollection.findMany = function (query: FilterQuery<any>, options?: FindOneOptions | undefined): Promise<any[]> {
+      return this.find(query, options).toArray();
+    };
+    return mongoCollection;
   }
 
   public async cleanTests(): Promise<void> {

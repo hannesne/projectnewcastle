@@ -23,10 +23,30 @@ export class TestDataService implements ITestDataService {
     }
   }
 
-  public async loadTests(patientId: string, testId: string | undefined = undefined): Promise<ITest[]> {
-    return Promise.reject(Error(patientId + testId));
+  public async findTests(patientId: string, testId: string | undefined = undefined): Promise<ITest[] | null> {
+    if (testId === undefined) {
+      const results = await this.collection.findMany({patientId});
+      if (results != null) {
+        return results.map(item => this.createTest(item));
+      }
+      else {
+        return [];
+      }
+    } else {
+      const result = await this.collection.findOne({_id: testId});
+      if (result != null)
+        return [this.createTest(result)];
+      else 
+        return null;
+    }
   }
 
+
+  private createTest(value: IDBTest): ITest {
+    delete value._id;
+    delete value._shardKey;
+    return value;
+  }
 }
 
 interface IDBTest extends ITest {
