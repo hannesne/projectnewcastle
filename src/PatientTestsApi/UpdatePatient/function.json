@@ -8,7 +8,7 @@
       "methods": [
         "get"
       ],
-      "route": "patient/{registration-id}"
+      "route": "patient/{patient-id}"
     },
     {
       "type": "http",
@@ -16,5 +16,5 @@
       "name": "res"
     }
   ],
-  "scriptFile": "../dist/LoadPatient/index.js"
+  "scriptFile": "../dist/UpdatePatient/index.js"
 }

@@ -47,19 +47,19 @@ export class PatientController {
 
   // Finds an existing patient in the database
   public async findPatient(req: HttpRequest): Promise<IResponse> {
-    const registrationId = req.params['registration-id'];
+    const patientId = req.params['patient-id'];
 
-    if (!registrationId || registrationId.length === 0) {
+    if (!patientId || patientId.length === 0) {
       return new BadRequestResponse("Missing registration id");
     }
    
     try {
-      await this.auditService.LogAuditRecord(this.createAuditResource(registrationId, "find"));
+      await this.auditService.LogAuditRecord(this.createAuditResource(patientId, "find"));
     } catch (error) {
       return new AuditingErrorResponse(error);
     }
     
-    const patient: IPatient | null = await this.patientDataService.findPatient(registrationId);
+    const patient: IPatient | null = await this.patientDataService.findPatient(patientId);
     
     if (!patient)
       return new NotFoundResponse("Patient not found");
@@ -70,18 +70,18 @@ export class PatientController {
   // Updates an existing patient
   public async updatePatient(req: HttpRequest): Promise<IResponse> {
     const validationResult = PatientSchema.validate(req.body);
-    const registrationId = req.params['registration-id'];
+    const patientId = req.params['patient-id'];
 
     if (validationResult.error != null) {
       return new BadRequestResponse(validationResult.error.message);
     }
 
-    if (registrationId == null || registrationId.length == 0) {
+    if (patientId == null || patientId.length == 0) {
       return new BadRequestResponse("Missing ID parameter in the URL");
     }
 
     // Check if two registration IDs (in URL and data body) exist and are equal
-    if (registrationId != req.body.id) {
+    if (patientId != req.body.id) {
       return new BadRequestResponse('Inconsistent registration IDs');
     }
     
@@ -106,19 +106,19 @@ export class PatientController {
     // Searches for patients in the database
     public async searchPatient(req: HttpRequest): Promise<IResponse> {
       /*
-      const registrationId = req.params['registration-id'];
+      const patientId = req.params['patient-id'];
   
-      if (!registrationId || registrationId.length === 0) {
+      if (!patientId || patientId.length === 0) {
         return new BadRequestResponse("Missing registration id");
       }
      
       try {
-        await this.auditService.LogAuditRecord(this.createAuditResource(registrationId, "find"));
+        await this.auditService.LogAuditRecord(this.createAuditResource(patientId, "find"));
       } catch (error) {
         return new AuditingErrorResponse(error);
       }
       
-      const patient: IPatient | null = await this.patientDataService.findPatient(registrationId);
+      const patient: IPatient | null = await this.patientDataService.findPatient(patientId);
       
       if (!patient)
         return new NotFoundResponse("Patient not found");
