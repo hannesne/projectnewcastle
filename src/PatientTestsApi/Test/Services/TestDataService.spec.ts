@@ -51,9 +51,7 @@ describe("TestDataService #integration", async function (): Promise<void> {
     expect(actualTests!.length).to.be.at.least(2);
     expect(actualTests!.every(item => item.patientId == patientId)).to.be.true;
     expect(actualTests!.map(item => item.id)).to.include.members(expectedIds);
-
   });  
-
   
   after(async function (): Promise<void> {
     await db.cleanTests();

@@ -1,6 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ICollection } from "./ICollection";
-import { CollectionInsertOneOptions, FilterQuery, FindOneOptions, InsertOneWriteOpResult } from "mongodb";
+import { CollectionInsertOneOptions, 
+         FilterQuery, 
+         FindOneOptions, 
+         InsertOneWriteOpResult,
+         UpdateOneOptions,
+         UpdateQuery,
+         UpdateWriteOpResult } from "mongodb";
 import { Timer } from "./app-insights/timer";
 import { IDependencyTelemetry, IAppInsightsService } from "./app-insights/app-insights-service";
 
@@ -28,6 +34,14 @@ export class LoggingCollection implements ICollection {
   public async findMany(query: FilterQuery<any>, options?: FindOneOptions | undefined): Promise<any[]> {
     const mongoRequest = JSON.stringify({findMany: {query}});
     return this.trackDependency(() => this.collection.findMany(query, options), mongoRequest);
+  }
+
+  public async updateOne(
+    filter: FilterQuery<any>, 
+    update: UpdateQuery<any> | Partial<any>, options?: UpdateOneOptions
+  ): Promise<UpdateWriteOpResult> {
+    const mongoRequest = JSON.stringify({updateOne: {filter}});
+    return this.trackDependency(() => this.collection.updateOne(filter, update, options), mongoRequest);
   }
 
   private async trackDependency<T>(fn: () => Promise<T>, query: string): Promise<T> {
