@@ -16,5 +16,5 @@
       "name": "res"
     }
   ],
-  "scriptFile": "../dist/UpdatePatient/index.js"
+  "scriptFile": "../dist/LoadPatient/index.js"
 }

@@ -47,7 +47,7 @@ export class PatientController {
 
   // Finds an existing patient in the database
   public async findPatient(req: HttpRequest): Promise<IResponse> {
-    const registrationId = req.params['registration-id'];
+    const registrationId = req.params["patientId"];
 
     if (!registrationId || registrationId.length === 0) {
       return new BadRequestResponse("Missing registration id");
@@ -70,7 +70,7 @@ export class PatientController {
   // Updates an existing patient
   public async updatePatient(req: HttpRequest): Promise<IResponse> {
     const validationResult = PatientSchema.validate(req.body);
-    const registrationId = req.params['registration-id'];
+    const registrationId = req.params["patientId"];
 
     if (validationResult.error != null) {
       return new BadRequestResponse(validationResult.error.message);

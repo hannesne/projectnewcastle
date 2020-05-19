@@ -142,7 +142,7 @@ describe("PatientController", async function (): Promise<void> {
     const request = createEmptyRequest();
 
     // configure request
-    request.params['registration-id'] = '0';
+    request.params["patientId"] = '0';
 
     // response
     when(dataServiceMock.findPatient(anything())).thenResolve(null);
@@ -158,7 +158,7 @@ describe("PatientController", async function (): Promise<void> {
     const request = createEmptyRequest();
 
     // configure request
-    request.params['registration-id'] = '1';
+    request.params["patientId"] = '1';
 
     // response
     const patient = PatientFixture.createPatient();
@@ -189,7 +189,7 @@ describe("PatientController", async function (): Promise<void> {
     const request = createPatientRequest();
 
     // configure request
-    request.params['registration-id'] = '1';
+    request.params["patientId"] = '1';
 
     // call update
     const result = await controller.updatePatient(request);
@@ -204,7 +204,7 @@ describe("PatientController", async function (): Promise<void> {
 
     // configure request
     request.body.id = uuidv4();
-    request.params['registration-id'] = request.body.id;
+    request.params["patientId"] = request.body.id;
 
     // configure mock
     when(dataServiceMock.updatePatient(anything())).thenThrow(new UpdateFailedError());
@@ -225,7 +225,7 @@ describe("PatientController", async function (): Promise<void> {
 
     // configure request
     request.body.id = uuidv4();
-    request.params['registration-id'] = request.body.id;
+    request.params["patientId"] = request.body.id;
 
     // configure mock
     const patient = PatientFixture.createPatient();
