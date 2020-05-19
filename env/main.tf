@@ -372,8 +372,8 @@ resource "azurerm_api_management_api_operation" "patient_load" {
   api_name            = azurerm_api_management_api.patient.name
   api_management_name = azurerm_api_management_api.patient.api_management_name
   resource_group_name = azurerm_api_management_api.patient.resource_group_name
-  display_name        = "Create Patient"
-  method              = "POST"
+  display_name        = "Load Patient"
+  method              = "GET"
   url_template        = "/{patientId}"
   template_parameter  {
     name  = "patientId"
