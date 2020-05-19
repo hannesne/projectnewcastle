@@ -23,6 +23,10 @@ export class TestDataService implements ITestDataService {
     }
   }
 
+  public async loadTests(patientId: string, testId: string | undefined = undefined): Promise<ITest[]> {
+    return Promise.reject(Error(patientId + testId));
+  }
+
 }
 
 interface IDBTest extends ITest {
