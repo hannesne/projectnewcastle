@@ -79,7 +79,6 @@ resource "azurerm_cosmosdb_mongo_collection" "coll_audit" {
   throughput          = 400
 }
 
-
 # Storage Account
 resource "azurerm_storage_account" "sa" {
   name                      = "${var.project_name}sa${var.environment}"
@@ -194,8 +193,6 @@ resource "null_resource" "deploy_patient_api" {
     module.fa_patient_api
   ]
 }
-
-
 
 # Audit API
 module "fa_audit_api" {
@@ -375,10 +372,27 @@ resource "azurerm_api_management_api_operation" "patient_load" {
   display_name        = "Load Patient"
   method              = "GET"
   url_template        = "/{patientId}"
-  template_parameter  {
-    name  = "patientId"
+
+  template_parameter {
+    name     = "patientId"
     required = true
-    type = "string"
+    type     = "string"
+  }
+}
+
+resource "azurerm_api_management_api_operation" "patient_update" {
+  operation_id        = "patient-update"
+  api_name            = azurerm_api_management_api.patient.name
+  api_management_name = azurerm_api_management_api.patient.api_management_name
+  resource_group_name = azurerm_api_management_api.patient.resource_group_name
+  display_name        = "Update Patient"
+  method              = "PUT"
+  url_template        = "/{patientId}"
+
+  template_parameter {
+    name     = "patientId"
+    required = true
+    type     = "string"
   }
 }
 
