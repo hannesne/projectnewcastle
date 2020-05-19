@@ -6,9 +6,9 @@
       "direction": "in",
       "name": "req",
       "methods": [
-        "get"
+        "put"
       ],
-      "route": "patient/{registration-id}"
+      "route": "patient/{patientId}"
     },
     {
       "type": "http",
