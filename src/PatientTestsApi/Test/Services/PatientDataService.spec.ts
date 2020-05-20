@@ -3,6 +3,7 @@ import { PatientDataService } from "../../Services/PatientDataService";
 import { expect } from "chai";
 import { PatientFixture } from "../Fixtures/PatientFixture";
 import { UpdateFailedError } from "../../Models/UpdateFailedError";
+import { IPatientSearch } from "../../Models/IPatient";
 
 const db = new DBFixture();
 
@@ -85,6 +86,97 @@ describe("PatientDataService #integration", async function (): Promise<void> {
       expect(e).to.be.instanceOf(UpdateFailedError);
     }
   }); 
+
+  it("Can create and search for patients - simple criteria", async function (): Promise<void> {
+    const dataService: PatientDataService = createPatientDataService();
+    const patients = [];
+
+    // create sample patients
+    for (var i = 0; i < 3; i++) {
+      const expectedPatient = PatientFixture.createPatientForCreatingInDb();
+      expectedPatient.id = 'searchId-' + i;    
+      const id = await dataService.insertPatient(expectedPatient);  
+      patients.push(expectedPatient);
+    }
+    
+    // search for simple fields
+    const fullPatientSearch = PatientFixture.createSimplePatientSearch();
+
+    // loop through all fields and test queries one by one
+    Object.keys(fullPatientSearch).forEach(async x => {
+      if (!(fullPatientSearch[x] instanceof Date) && !(Array.isArray(fullPatientSearch[x]))) {
+        const patientSearch: IPatientSearch = {};
+        patientSearch[x] = fullPatientSearch[x];
+        const searchResult = await dataService.searchPatient(patientSearch);
+        expect(searchResult.length).to.be.at.least(patients.length);
+      }
+    });
+  }); 
+
+  it("Should not find patients - simple criteria", async function (): Promise<void> {
+    const dataService: PatientDataService = createPatientDataService();
+
+    // search for simple fields
+    const fullPatientSearch = PatientFixture.createSimplePatientSearch();
+
+    // loop through all fields and test queries one by one
+    Object.keys(fullPatientSearch).forEach(async x => {
+      if (!(fullPatientSearch[x] instanceof Date) && !(Array.isArray(fullPatientSearch[x]))) {
+        const patientSearch: IPatientSearch = {};
+        patientSearch[x] = 'random-string'
+        const searchResult = await dataService.searchPatient(patientSearch);
+        expect(searchResult.length).to.equal(0);
+      }
+    });
+  }); 
+
+  it("Can create and search for patients - date criteria", async function (): Promise<void> {
+    const dataService: PatientDataService = createPatientDataService();
+    const patients = [];
+
+    // create sample patients
+    for (var i = 0; i < 3; i++) {
+      const expectedPatient = PatientFixture.createPatientForCreatingInDb();
+      expectedPatient.id = "searchIdDate-" + i;    
+      expectedPatient.dateOfBirth = "1808-05-23";
+      const id = await dataService.insertPatient(expectedPatient);  
+      patients.push(expectedPatient);
+    }
+    
+    // search for date field from
+    var patientSearch: IPatientSearch = {
+      dateOfBirthFrom: new Date("1808-05-23")
+    };
+    var searchResult = await dataService.searchPatient(patientSearch);
+    expect(searchResult.length).to.be.at.least(patients.length);
+
+    // search for date field to
+    patientSearch = {
+      dateOfBirthTo: new Date("1808-05-23")
+    };
+    searchResult = await dataService.searchPatient(patientSearch);
+    expect(searchResult.length).to.equal(patients.length);
+
+    // search for both date fields
+    patientSearch = {
+      dateOfBirthTo: new Date("1808-05-24"),
+      dateOfBirthFrom: new Date("1808-05-22")
+    };
+    searchResult = await dataService.searchPatient(patientSearch);
+    expect(searchResult.length).to.equal(patients.length);
+  });
+
+  it("Should not find patients - date criteria", async function (): Promise<void> {
+    const dataService: PatientDataService = createPatientDataService();
+    
+    // search for both date fields
+    const patientSearch = {
+      dateOfBirthTo: new Date("1708-05-24"),
+      dateOfBirthFrom: new Date("1708-05-22")
+    };
+    const searchResult = await dataService.searchPatient(patientSearch);
+    expect(searchResult.length).to.equal(0);
+  });
 
   after(async function (): Promise<void> {
     await db.cleanPatients();
