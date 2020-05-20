@@ -42,6 +42,8 @@
     "axios": "^0.19.2",
     "http-status-codes": "^1.4.0",
     "mongodb": "^3.5.7",
+    "moment": "^2.24.0",
+    "moment-timezone": "^0.5.28",
     "uuid": "^8.0.0"
   }
 }

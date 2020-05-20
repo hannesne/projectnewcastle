@@ -3,6 +3,7 @@ import { IPatient, IPatientSearch } from "../Models/IPatient";
 import { ICollection } from "./ICollection";
 import { InsertFailedError } from "../Models/InsertFailedError";
 import { UpdateFailedError } from "../Models/UpdateFailedError";
+import { addDateCriteria, addPreciseDateCriteria, createSimpleCriteriaOperatorList, isObjectEmpty, removeUndefinedPropertiesFromObject } from '../Util/Utils';
 
 export class PatientDataService implements IPatientDataService {
   constructor (private readonly collection: ICollection) {
@@ -66,8 +67,26 @@ export class PatientDataService implements IPatientDataService {
 
   // searches patients
   public async searchPatient(patientSearch: IPatientSearch): Promise<IPatient[]> {
-    const filter = { };
-    const result = await this.collection.findMany(filter);
+    let queryFilter = {};
+
+    // first off, delete all undefined values from the object
+    removeUndefinedPropertiesFromObject(patientSearch);
+
+    // if we're not empty, then start putting the query together
+    // tslint:disable: no-unsafe-any no-any
+    const operatorList = createSimpleCriteriaOperatorList(patientSearch);
+
+    // add dates
+    addDateCriteria(patientSearch.dateOfBirthFrom, patientSearch.dateOfBirthTo, '_dateOfBirthDate', operatorList);
+
+    // set up query filter
+    if (operatorList.length > 0) {
+      queryFilter = {
+        $and: operatorList
+      };
+    }
+
+    const result = await this.collection.findMany(queryFilter);
     const patients: IPatient[] = [];
 
     if (result) {
@@ -82,6 +101,10 @@ export class PatientDataService implements IPatientDataService {
     }
 
     return patients;
+  }
+
+  private createSearchCriteria(search: IPatientSearch) {
+    const simpleCriteriaOperatorList = createSimpleCriteriaOperatorList(search);
   }
 }
 
