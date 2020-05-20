@@ -1,24 +1,14 @@
 {
   "bindings": [
     {
-<<<<<<< HEAD
-      "authLevel": "anonymous",
-=======
       "authLevel": "function",
->>>>>>> master
       "type": "httpTrigger",
       "direction": "in",
       "name": "req",
       "methods": [
-<<<<<<< HEAD
         "get"
       ],
-      "route": "patient/{registration-id}"
-=======
-        "put"
-      ],
-      "route": "patient/{patientId}"
->>>>>>> master
+      "route": "patient/{patientId:guid}/tests/{testId:guid?}"
     },
     {
       "type": "http",
@@ -26,5 +16,5 @@
       "name": "res"
     }
   ],
-  "scriptFile": "../dist/UpdatePatient/index.js"
+  "scriptFile": "../dist/LoadTest/index.js"
 }
