@@ -1,5 +1,5 @@
 import { IPatientDataService } from "./IPatientDataService";
-import { IPatient } from "../Models/IPatient";
+import { IPatient, IPatientSearch } from "../Models/IPatient";
 import { ICollection } from "./ICollection";
 import { InsertFailedError } from "../Models/InsertFailedError";
 import { UpdateFailedError } from "../Models/UpdateFailedError";
@@ -62,6 +62,26 @@ export class PatientDataService implements IPatientDataService {
     else {
       throw new UpdateFailedError();
     }
+  }
+
+  // searches patients
+  public async searchPatient(patientSearch: IPatientSearch): Promise<IPatient[]> {
+    const filter = { };
+    const result = await this.collection.findMany(filter);
+    const patients: IPatient[] = [];
+
+    if (result) {
+      result.forEach(x => {
+        // remove database properties
+        delete x._id;
+        delete x._shardKey;
+        delete x._dateOfBirthDate;
+
+        patients.push(x);
+      });
+    }
+
+    return patients;
   }
 }
 

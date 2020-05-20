@@ -1,5 +1,5 @@
 import { HttpRequest } from "@azure/functions";
-import { IPatient, PatientSchema } from "../Models/IPatient";
+import { IPatient, PatientSchema, IPatientSearch, PatientSearchSchema } from "../Models/IPatient";
 import { IResponse } from "../Models/IResponse";
 import { IPatientDataService } from "../Services/IPatientDataService";
 import { CreatedResponse} from "../Models/CreatedResponse";
@@ -105,27 +105,28 @@ export class PatientController {
 
   // Searches for patients in the database
   public async searchPatient(req: HttpRequest): Promise<IResponse> {
-    /*
-    const patientId = req.params["patientId"];
-
-    if (!patientId || patientId.length === 0) {
-      return new BadRequestResponse("Missing registration id");
+    const validationResult = PatientSearchSchema.validate(req.body);
+    
+    if (validationResult.error != null) {
+      return new BadRequestResponse(validationResult.error.message);
     }
     
+    // get body
+    const patientSearch = req.body as IPatientSearch;
+
     try {
-      await this.auditService.LogAuditRecord(this.createAuditResource(patientId, "find"));
+      const resource = JSON.stringify(req.body);
+      await this.auditService.LogAuditRecord(this.createAuditResource(resource, "search"));
     } catch (error) {
       return new AuditingErrorResponse(error);
     }
     
-    const patient: IPatient | null = await this.patientDataService.findPatient(patientId);
+    const patients: IPatient[] = await this.patientDataService.searchPatient(patientSearch);
     
-    if (!patient)
-      return new NotFoundResponse("Patient not found");
+    if (patients.length === 0)
+      return new NotFoundResponse("No patients found with provided criteria");
     else
-      return new ApiResponse(patient);
-    */
-    return new ApiResponse("");
+      return new ApiResponse(patients);
   }
 
   private createAuditResource(newPatientId: string, operation: string): IAuditResource {

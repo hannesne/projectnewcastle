@@ -52,3 +52,20 @@ export const PatientSchema = Joi.object<IPatient>({
   preferredContactNumber: Joi.string(),
   lastUpdated: Joi.date().optional(),
 });
+
+export const PatientSearchSchema = Joi.object<IPatientSearch>({
+  id: Joi.string().guid(),
+  firstName: Joi.string().max(maxLengthNameField),
+  lastName: Joi.string().max(maxLengthNameField),
+  fullName: Joi.string().max(maxLengthFullNameField),
+
+  gender: Joi.string()
+    .allow(Gender.Male, Gender.Female, Gender.Other, Gender.Unknown)
+    .only(),
+
+  dateOfBirthFrom: Joi.date(),
+  dateOfBirthTo: Joi.date(),
+  postCode: Joi.string().length(postcodeLength),
+  insuranceNumber: Joi.string(),
+  preferredContactNumber: Joi.string(),
+});

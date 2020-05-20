@@ -242,4 +242,58 @@ describe("PatientController", async function (): Promise<void> {
     patient.lastUpdated = receivedPatient.lastUpdated;
     expect(receivedPatient).to.be.deep.equal(requestedPatient);
   });
+
+  it("Returns validation error if patient search is not valid.", async function (): Promise<void> {
+    const dataServiceMock = mock<IPatientDataService>();
+    const controller = createController(instance(dataServiceMock));
+    const request = createEmptyRequest();
+
+    // configure request
+    request.body = {
+      invalid: "attribute"
+    };
+
+    // response
+    when(dataServiceMock.searchPatient(anything())).thenResolve([]);
+    
+    const result = await controller.searchPatient(request);
+    expect(result).to.be.an.instanceOf(BadRequestResponse);
+  });
+
+  it("Returns not found if patient is not found in search.", async function (): Promise<void> {
+    const dataServiceMock = mock<IPatientDataService>();
+    const controller = createController(instance(dataServiceMock));
+    const request = createEmptyRequest();
+
+    // config request
+    request.body = {};
+    
+    // response
+    when(dataServiceMock.searchPatient(anything())).thenResolve([]);
+    
+    const result = await controller.searchPatient(request);
+    expect(result).to.be.an.instanceOf(NotFoundResponse);
+    expect(result.body).to.equal("No patients found with provided criteria");
+  });
+
+  it("Returns patients found by the search.", async function (): Promise<void> {
+    const dataServiceMock = mock<IPatientDataService>();
+    const controller = createController(instance(dataServiceMock));
+    const request = createEmptyRequest();
+
+    // configure response
+    const patients = [
+      PatientFixture.createPatient(),
+      PatientFixture.createPatient(),
+      PatientFixture.createPatient()
+    ];
+
+    // response
+    when(dataServiceMock.searchPatient(anything())).thenResolve(patients);
+    
+    const result = await controller.searchPatient(request);
+    const patientResults = result.body as IPatient[];
+    expect(result.status).to.equal(HttpStatus.OK);
+    expect(patientResults.length).to.equal(patients.length);
+  });
 });
