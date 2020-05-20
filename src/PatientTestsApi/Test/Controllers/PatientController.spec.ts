@@ -126,7 +126,7 @@ describe("PatientController", async function (): Promise<void> {
     expect(response.body).to.match(/^Error creating audit log:/i);
   });
 
-  it("Returns BadRequest if patient id not passed in.", async function (): Promise<void> {
+  it("Returns BadRequest if patient id not passed in to find.", async function (): Promise<void> {
     const dataServiceMock = mock<IPatientDataService>();
     const controller = createController(instance(dataServiceMock));
     const request = createEmptyRequest();
@@ -149,7 +149,7 @@ describe("PatientController", async function (): Promise<void> {
     
     const result = await controller.findPatient(request);
     expect(result).to.be.an.instanceOf(NotFoundResponse);
-    expect(result.body).to.equal("Patient not found")
+    expect(result.body).to.equal("Patient not found");
   });
 
   it("Returns a patient with the right id.", async function (): Promise<void> {

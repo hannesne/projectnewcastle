@@ -103,30 +103,30 @@ export class PatientController {
     return new ApiResponse(patient);
   }
 
-    // Searches for patients in the database
-    public async searchPatient(req: HttpRequest): Promise<IResponse> {
-      /*
-      const patientId = req.params["patientId"];
-  
-      if (!patientId || patientId.length === 0) {
-        return new BadRequestResponse("Missing registration id");
-      }
-     
-      try {
-        await this.auditService.LogAuditRecord(this.createAuditResource(patientId, "find"));
-      } catch (error) {
-        return new AuditingErrorResponse(error);
-      }
-      
-      const patient: IPatient | null = await this.patientDataService.findPatient(patientId);
-      
-      if (!patient)
-        return new NotFoundResponse("Patient not found");
-      else
-        return new ApiResponse(patient);
-      */
-      return new ApiResponse("");
+  // Searches for patients in the database
+  public async searchPatient(req: HttpRequest): Promise<IResponse> {
+    /*
+    const patientId = req.params["patientId"];
+
+    if (!patientId || patientId.length === 0) {
+      return new BadRequestResponse("Missing registration id");
     }
+    
+    try {
+      await this.auditService.LogAuditRecord(this.createAuditResource(patientId, "find"));
+    } catch (error) {
+      return new AuditingErrorResponse(error);
+    }
+    
+    const patient: IPatient | null = await this.patientDataService.findPatient(patientId);
+    
+    if (!patient)
+      return new NotFoundResponse("Patient not found");
+    else
+      return new ApiResponse(patient);
+    */
+    return new ApiResponse("");
+  }
 
   private createAuditResource(newPatientId: string, operation: string): IAuditResource {
     return { 
