@@ -361,7 +361,13 @@ resource "azurerm_api_management_api_policy" "patient_policy" {
     <base />
     <choose>
       <when condition="@(context.Response.StatusCode == 401)">
-        <cache-remove-value key="func-host-key" />
+        <!-- Update function host key -->
+        <send-request ignore-error="false" timeout="20" response-variable-name="coderesponse" mode="new">
+          <set-url>${data.azurerm_key_vault_secret.fa_patient_api_host_key.id}?api-version=7.0</set-url>
+          <set-method>GET</set-method>
+          <authentication-managed-identity resource="https://vault.azure.net" />
+        </send-request>
+        <cache-store-value key="func-host-key" value="@((string)((IResponse)context.Variables["coderesponse"]).Body.As<JObject>()["value"])" duration="100000" />
       </when>
     </choose>
   </outbound>
