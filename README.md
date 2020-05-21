@@ -14,7 +14,7 @@ At the core of the solution is a set of micro-services. The first service (Patie
 
 The Audit API is locked down to only be accessible at a network level from other systems in the same vnet. The PatientTests API is similarly locked down to only be acessible from API Management.  Only the API Management is accessible from the public internet. In addition to the network-level security, the function apps are also protected by requiring service keys for access. These keys are maintained in Key Vault, along with other sensitive data such as connection strings, and is only available to specified identiies. More information on the security aspects can be found *here - placeholder*.
 
-Telemetry is captured across the whole request pipeline from API Management and the Functions. Telemetry shares a common operation id, allowing it to be correlated across these components. More information about this distributed telemetry tracing can be found  *here - placeholder*.
+Telemetry is captured across the whole request pipeline from API Management and the Functions. Telemetry shares a common operation id, allowing it to be correlated across these components. More information about this distributed telemetry tracing can be found [here](docs/DistributedTelemetry.md).
 
 ## The code
 
