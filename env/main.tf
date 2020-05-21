@@ -174,7 +174,7 @@ module "fa_patient_api" {
     mongo_connection_string = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.cosmos_conn.id})"
     patient_tests_database  = "newcastle"
     audit_api_url           = "https://${module.fa_audit_api.default_hostname}/api/auditrecord"
-    audit_auth_key          = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.fa_audit_api_host_key.id})"
+    audit_auth_key          = "@Microsoft.KeyVault(SecretUri=${data.azurerm_key_vault_secret.fa_audit_api_host_key.id})"
   }
 
   key_vault_id = azurerm_key_vault.kv.id
@@ -343,7 +343,7 @@ resource "azurerm_api_management_api_policy" "patient_policy" {
       <when condition="@(!context.Variables.ContainsKey("funchostkey"))">
         <!-- Make HTTP request to get function host key -->
         <send-request ignore-error="false" timeout="20" response-variable-name="coderesponse" mode="new">
-          <set-url>${azurerm_key_vault_secret.fa_patient_api_host_key.id}?api-version=7.0</set-url>
+          <set-url>${data.azurerm_key_vault_secret.fa_patient_api_host_key.id}?api-version=7.0</set-url>
           <set-method>GET</set-method>
           <authentication-managed-identity resource="https://vault.azure.net" />
         </send-request>
@@ -357,6 +357,14 @@ resource "azurerm_api_management_api_policy" "patient_policy" {
       <value>@((string)context.Variables["funchostkey"])</value>
     </set-header>
   </inbound>
+  <outbound>
+    <base />
+    <choose>
+      <when condition="@(context.Response.StatusCode == 401)">
+        <cache-remove-value key="func-host-key" />
+      </when>
+    </choose>
+  </outbound>
 </policies>
 XML
 }
@@ -490,6 +498,11 @@ resource "azurerm_key_vault_secret" "fa_patient_api_host_key" {
   ]
 }
 
+data "azurerm_key_vault_secret" "fa_patient_api_host_key" {
+  name         = azurerm_key_vault_secret.fa_patient_api_host_key.name
+  key_vault_id = azurerm_key_vault_secret.fa_patient_api_host_key.key_vault_id
+}
+
 resource "azurerm_key_vault_secret" "fa_audit_api_host_key" {
   name         = "fa-audit-api-host-key"
   value        = data.external.fa_audit_api_host_key.result.default
@@ -498,4 +511,9 @@ resource "azurerm_key_vault_secret" "fa_audit_api_host_key" {
   depends_on = [
     azurerm_key_vault_access_policy.sp
   ]
+}
+
+data "azurerm_key_vault_secret" "fa_audit_api_host_key" {
+  name         = azurerm_key_vault_secret.fa_audit_api_host_key.name
+  key_vault_id = azurerm_key_vault_secret.fa_audit_api_host_key.key_vault_id
 }
