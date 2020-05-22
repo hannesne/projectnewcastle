@@ -23,8 +23,9 @@ You can perform these tasks manually in the Azure Portal, or you can use the Azu
 3. Update the key vault reference in app settings: [az functionapp config appsettings set](https://docs.microsoft.com/en-us/cli/azure/functionapp/config/appsettings?view=azure-cli-latest#az-functionapp-config-appsettings-set)
 
 However, we don't want to do these tasks manually due to following reasons.
-1. Because we are using Terraform as IaC (Infrastructure as Code), we should maintain our configuraiton in Terraform, as far as possible. It's a bad practice if you mix Terraform and manual resource provisioning.
-2. In our case, the key vault reference in app settings depends on the secret latest `id` and the secret `value` depends on the host key in function app. With Terraform you can refer these resources very easily and Terraform will maintain these resources based on their dependencies.
+
+1. Because we are using Terraform as IaC (Infrastructure as Code), we should maintain our configuration in Terraform, as far as possible. It's a bad practice if you mix Terraform and manual resource provisioning.
+2. In our case, the key vault reference in app settings depends on the secret's latest `id` and the secret `value` depends on the host key in function app. With Terraform you can refer these resources very easily and Terraform will maintain these resources based on their dependencies.
 
 ### Rotate the host key
 
@@ -118,7 +119,7 @@ resource "azurerm_key_vault_secret" "fa_patient_api_host_key" {
 
 If a secret in Key Vault is changed, a new `id` will be generated for the secret. Since Patient API caching policy refers to the key vault secret with the latest `id`, Terraform will update the reference in caching policy if the secret is updated with a new `id`.
 
-Since we cached the host key in API Management, the retired key may still exist in the cache, we need to find a way to remove it from cache or update it to the latest host key. We are using internal cache in API Management and there is no REST API to handle internal cache, so it's not easy to update or remove the cache. After trying some workarounds, a great idea came to our mind. Why not use the latest secret `version` as the cache name like this `key="${data.azurerm_key_vault_secret.fa_patient_api_host_key.version}"`? So if the host key is updated, the cache name will be updated as well which will raise a cache miss and force API Management to retrieve the latest host key in Key Vault. The idea can be implemented easily in Terraform like below.
+Since we cached the host key in API Management, the retired key may still exist in the cache, we need to find a way to remove it from cache or update it to the latest host key. We are using internal cache in API Management and there is no REST API to handle internal cache, so it's not easy to update or remove the cache. After trying some workarounds, a great idea came to our mind. Why not use the latest secret `version` as the key for the cache item, like this `key="${data.azurerm_key_vault_secret.fa_patient_api_host_key.version}"`? So if the host key is updated, the cache name will be updated as well which will raise a cache miss and force API Management to retrieve the latest host key in Key Vault. The policy can easily be generated in Terraform like below:
 
 ```terraform
 data "azurerm_key_vault_secret" "fa_patient_api_host_key" {
@@ -157,7 +158,7 @@ XML
 
 ## All in one to rotate host keys
 
-Last but not least, how to rotate host keys? There are only two steps.
+Last but not least, how do we rotate host keys? There are only two steps:
 
-1. Use Azure CLI to update either host key or both host keys
-2. Run `terraform apply` with your variables
+1. Use Azure CLI to update either or both host keys
+2. Run `terraform apply` with your variables to update the dependent sytems
