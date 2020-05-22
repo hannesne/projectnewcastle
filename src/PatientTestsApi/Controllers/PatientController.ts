@@ -82,7 +82,7 @@ export class PatientController {
 
     // Check if two registration IDs (in URL and data body) exist and are equal
     if (patientId != req.body.id) {
-      return new BadRequestResponse('Inconsistent registration IDs');
+      return new BadRequestResponse("Inconsistent registration IDs");
     }
     
     // get body
@@ -97,7 +97,7 @@ export class PatientController {
 
     // update patient
     patient.lastUpdated = new Date();
-    const id = await this.patientDataService.updatePatient(patient);
+    await this.patientDataService.updatePatient(patient);
 
     // returns update
     return new ApiResponse(patient);

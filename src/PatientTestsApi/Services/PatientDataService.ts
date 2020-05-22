@@ -3,7 +3,7 @@ import { IPatient, IPatientSearch } from "../Models/IPatient";
 import { ICollection } from "./ICollection";
 import { InsertFailedError } from "../Models/InsertFailedError";
 import { UpdateFailedError } from "../Models/UpdateFailedError";
-import { addDateCriteria, createSimpleCriteriaOperatorList, removeUndefinedPropertiesFromObject, removeDatabaseProperties } from '../Util/Utils';
+import { addDateCriteria, createSimpleCriteriaOperatorList, removeUndefinedPropertiesFromObject } from "../Util/Utils";
 
 export class PatientDataService implements IPatientDataService {
   constructor (private readonly collection: ICollection) {
@@ -29,11 +29,11 @@ export class PatientDataService implements IPatientDataService {
 
   public async findPatient(id: string): Promise<IPatient | null> {
     const filter = { id };
-    const result: IPatient = await this.collection.findOne(filter) as IPatient;
+    const result: IDBPatient = await this.collection.findOne(filter) as IDBPatient;
 
     if (result) {
       // remove database properties
-      removeDatabaseProperties(result);
+      return this.createPatient(result);
     }
 
     return result;
@@ -75,7 +75,7 @@ export class PatientDataService implements IPatientDataService {
     const operatorList = createSimpleCriteriaOperatorList(patientSearch);
 
     // add dates
-    addDateCriteria(patientSearch.dateOfBirthFrom, patientSearch.dateOfBirthTo, '_dateOfBirthDate', operatorList);
+    addDateCriteria(patientSearch.dateOfBirthFrom, patientSearch.dateOfBirthTo, "_dateOfBirthDate", operatorList);
 
     // set up query filter
     if (operatorList.length > 0) {
@@ -85,22 +85,20 @@ export class PatientDataService implements IPatientDataService {
     }
 
     const result = await this.collection.findMany(queryFilter);
-    const patients: IPatient[] = [];
-
+    
     if (result) {
-      result.forEach(x => {
-        // remove database properties
-        removeDatabaseProperties(x);
-
-        patients.push(x);
-      });
+      return result.map(item => this.createPatient(item));
     }
-
-    return patients;
+    return [];
   }
 
-  private createSearchCriteria(search: IPatientSearch) {
-    const simpleCriteriaOperatorList = createSimpleCriteriaOperatorList(search);
+  
+  private createPatient (obj: IDBPatient): IPatient {
+    // remove database properties
+    delete obj._id;
+    delete obj._shardKey;
+    delete obj._dateOfBirthDate;
+    return obj;
   }
 }
 

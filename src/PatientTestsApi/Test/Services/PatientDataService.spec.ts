@@ -53,34 +53,34 @@ describe("PatientDataService #integration", async function (): Promise<void> {
   it("Can create and update a patient", async function (): Promise<void> {
     const dataService: PatientDataService = createPatientDataService();
     const expectedPatient = PatientFixture.createPatient();
-    expectedPatient.id = 'updateId';    
+    expectedPatient.id = "updateId";    
     const id = await dataService.insertPatient(expectedPatient);
 
     // test updating patient via data service
-    expectedPatient.firstName = 'testFirstName';
+    expectedPatient.firstName = "testFirstName";
     const updatedId = await dataService.updatePatient(expectedPatient);
     expect(updatedId).not.to.be.null;
 
     // look it up and see if it's updated
-    const foundPatient = await dataService.findPatient(id!);
+    const foundPatient = await dataService.findPatient(id);
     Object.keys(foundPatient!).forEach(key => {
       expect(foundPatient![key]).deep.equal(expectedPatient[key]);
     });
-    expect(foundPatient!.id).is.equal(id!);
+    expect(foundPatient!.id).is.equal(id);
   }); 
 
   it("Fails to update incomplete object", async function (): Promise<void> {
     const dataService: PatientDataService = createPatientDataService();
     const expectedPatient = PatientFixture.createPatient();
-    expectedPatient.id = 'failedUpdateId';    
-    const id = await dataService.insertPatient(expectedPatient);
+    expectedPatient.id = "failedUpdateId";    
+    await dataService.insertPatient(expectedPatient);
 
     // test updating patient via data service
-    expectedPatient.firstName = 'testFirstName';
+    expectedPatient.firstName = "testFirstName";
     delete expectedPatient.id;
 
     try {
-      const updatedId = await dataService.updatePatient(expectedPatient);
+      await dataService.updatePatient(expectedPatient);
     }
     catch (e) {
       expect(e).to.be.instanceOf(UpdateFailedError);
@@ -92,10 +92,10 @@ describe("PatientDataService #integration", async function (): Promise<void> {
     const patients = [];
 
     // create sample patients
-    for (var i = 0; i < 3; i++) {
+    for (let i = 0; i < 3; i++) {
       const expectedPatient = PatientFixture.createPatientForCreatingInDb();
-      expectedPatient.id = 'searchId-' + i;    
-      const id = await dataService.insertPatient(expectedPatient);  
+      expectedPatient.id = "searchId-" + i;    
+      await dataService.insertPatient(expectedPatient);  
       patients.push(expectedPatient);
     }
     
@@ -123,7 +123,7 @@ describe("PatientDataService #integration", async function (): Promise<void> {
     Object.keys(fullPatientSearch).forEach(async x => {
       if (!(fullPatientSearch[x] instanceof Date) && !(Array.isArray(fullPatientSearch[x]))) {
         const patientSearch: IPatientSearch = {};
-        patientSearch[x] = 'random-string'
+        patientSearch[x] = "random-string";
         const searchResult = await dataService.searchPatient(patientSearch);
         expect(searchResult.length).to.equal(0);
       }
@@ -135,19 +135,19 @@ describe("PatientDataService #integration", async function (): Promise<void> {
     const patients = [];
 
     // create sample patients
-    for (var i = 0; i < 3; i++) {
+    for (let i = 0; i < 3; i++) {
       const expectedPatient = PatientFixture.createPatientForCreatingInDb();
       expectedPatient.id = "searchIdDate-" + i;    
       expectedPatient.dateOfBirth = "1808-05-23";
-      const id = await dataService.insertPatient(expectedPatient);  
+      await dataService.insertPatient(expectedPatient);  
       patients.push(expectedPatient);
     }
     
     // search for date field from
-    var patientSearch: IPatientSearch = {
+    let patientSearch: IPatientSearch = {
       dateOfBirthFrom: new Date("1808-05-23")
     };
-    var searchResult = await dataService.searchPatient(patientSearch);
+    let searchResult = await dataService.searchPatient(patientSearch);
     expect(searchResult.length).to.be.at.least(patients.length);
 
     // search for date field to

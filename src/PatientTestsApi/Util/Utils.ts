@@ -1,6 +1,6 @@
 import moment from "moment";
 import { ISearchCriteriaFragment } from "../Models/Search";
-import { IPatient, IPatientSearch } from "../Models/IPatient";
+import { IPatientSearch } from "../Models/IPatient";
 
 /**
  * Remove undefined properties from a JavaScript object.
@@ -8,20 +8,9 @@ import { IPatient, IPatientSearch } from "../Models/IPatient";
  *
  * Taken from https://stackoverflow.com/a/38340374/2442468
  */
-// tslint:disable: no-any no-unsafe-any
-export const removeUndefinedPropertiesFromObject = (obj: any) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const removeUndefinedPropertiesFromObject = (obj: any): void => {
   Object.keys(obj).forEach(key => obj[key] === undefined && delete obj[key]);
-};
-
-/**
- * Removes database-only properties from IPatient objects
- * @param obj 
- */
-export const removeDatabaseProperties = (obj: IPatient) => {
-  // remove database properties
-  delete obj._id;
-  delete obj._shardKey;
-  delete obj._dateOfBirthDate;
 };
 
 /**
@@ -29,8 +18,9 @@ export const removeDatabaseProperties = (obj: IPatient) => {
  *
  * Taken from https://stackoverflow.com/a/49427583
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const isObjectEmpty = (object: any): boolean =>
-  !Object.values(object).some(x => (x !== null && x !== ''));
+  !Object.values(object).some(x => (x !== null && x !== ""));
 
 /**
  * Resets a Date object to the end of the previous day
@@ -38,7 +28,7 @@ export const isObjectEmpty = (object: any): boolean =>
  */
 export const setDateToEndOfPreviousDay = (date: Date): Date => {
   const day = moment(date);
-  return day.subtract(1, 'day').endOf('day').toDate();
+  return day.subtract(1, "day").endOf("day").toDate();
 };
 
 /**
@@ -47,22 +37,22 @@ export const setDateToEndOfPreviousDay = (date: Date): Date => {
  */
 export const setDateToBeginningOfNextDay = (date: Date): Date => {
   const day = moment(date);
-  return day.add(1, 'day').startOf('day').toDate();
+  return day.add(1, "day").startOf("day").toDate();
 };
 
 /**
  * Adds a date criteria with the specified start and ned dates to the operatorlist
  */
-// tslint:disable: no-unsafe-any no-any
-// tslint:disable-next-line: no-unused-expression
 export const addDateCriteria = (startDate: Date | undefined, endDate: Date | undefined,
-                                propertyName: string, operatorList: any[], useEpoch: boolean = false,
-                                preciseTime: boolean = false): void => {
+                                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                propertyName: string, operatorList: any[], useEpoch = false,
+                                preciseTime = false): void => {
 
   if (!startDate && !endDate) {
     return;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const operator: any = {};
   operator[propertyName] = {};
 
@@ -75,14 +65,14 @@ export const addDateCriteria = (startDate: Date | undefined, endDate: Date | und
 
   if (!preciseTime) {
     // manipulate dates to get the correct range
-    addDateToOperator(setDateToEndOfPreviousDay, '$gt', startDate);
-    addDateToOperator(setDateToBeginningOfNextDay, '$lt', endDate);
+    addDateToOperator(setDateToEndOfPreviousDay, "$gt", startDate);
+    addDateToOperator(setDateToBeginningOfNextDay, "$lt", endDate);
   }
   else {
     // use range provided by the query, no-op processor
-    const processor = ((date: Date) => date);
-    addDateToOperator(processor, '$gte', startDate);
-    addDateToOperator(processor, '$lte', endDate);
+    const processor = ((date: Date): Date => date);
+    addDateToOperator(processor, "$gte", startDate);
+    addDateToOperator(processor, "$lte", endDate);
   }
 
   if (Object.keys(operator[propertyName]).length > 0) {
@@ -95,6 +85,7 @@ export const addDateCriteria = (startDate: Date | undefined, endDate: Date | und
  * @param searchCriteria the search criteria to use for the operator list.
  */
 export function createSimpleCriteriaOperatorList(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   searchCriteria: IPatientSearch): any[] {
 
   const simpleEqualCriteria = (key: string): boolean => !(searchCriteria[key] instanceof Date)
@@ -106,6 +97,7 @@ export function createSimpleCriteriaOperatorList(
     return frag;
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const operatorList: any[] = Object.keys(searchCriteria)
     .filter(simpleEqualCriteria)
     .map(createOperator);

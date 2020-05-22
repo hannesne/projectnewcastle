@@ -159,7 +159,7 @@ describe("PatientController", async function (): Promise<void> {
     const request = createEmptyRequest();
 
     // configure request
-    request.params["patientId"] = '1';
+    request.params["patientId"] = "1";
 
     // response
     const patient = PatientFixture.createPatient();
@@ -190,7 +190,7 @@ describe("PatientController", async function (): Promise<void> {
     const request = createPatientRequest();
 
     // configure request
-    request.params["patientId"] = '1';
+    request.params["patientId"] = "1";
 
     // call update
     const result = await controller.updatePatient(request);
@@ -212,7 +212,7 @@ describe("PatientController", async function (): Promise<void> {
 
     // call update
     try {
-      const result = await controller.updatePatient(request);
+      await controller.updatePatient(request);
     }
     catch (e) {
       expect(e).to.be.instanceOf(UpdateFailedError);
