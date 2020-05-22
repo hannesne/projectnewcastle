@@ -1,6 +1,6 @@
 import moment from "moment";
 import { ISearchCriteriaFragment } from "../Models/Search";
-import { IPatientSearch } from "../Models/IPatient";
+import { IPatient, IPatientSearch } from "../Models/IPatient";
 
 /**
  * Remove undefined properties from a JavaScript object.
@@ -14,21 +14,23 @@ export const removeUndefinedPropertiesFromObject = (obj: any) => {
 };
 
 /**
+ * Removes database-only properties from IPatient objects
+ * @param obj 
+ */
+export const removeDatabaseProperties = (obj: IPatient) => {
+  // remove database properties
+  delete obj._id;
+  delete obj._shardKey;
+  delete obj._dateOfBirthDate;
+};
+
+/**
  * Checks if an object has any properties left that are empty, or null.
  *
  * Taken from https://stackoverflow.com/a/49427583
  */
 export const isObjectEmpty = (object: any): boolean =>
   !Object.values(object).some(x => (x !== null && x !== ''));
-
-/**
- * Removes time from a Date object.
- * @param date date whose time will be removed
- */
-export const removeTimeFromDate = (date: Date): Date => {
-  const day = moment(date);
-  return day.startOf('day').toDate();
-};
 
 /**
  * Resets a Date object to the end of the previous day
@@ -105,54 +107,7 @@ export function createSimpleCriteriaOperatorList(
   };
 
   const operatorList: any[] = Object.keys(searchCriteria)
-  .filter(simpleEqualCriteria)
-  .map(createOperator);
+    .filter(simpleEqualCriteria)
+    .map(createOperator);
   return operatorList;
-}
-
-/**
- * Adds an epoch criteria with the specified start and ned dates to the operatorlist
- */
-// tslint:disable: no-unsafe-any no-any
-// tslint:disable-next-line: no-unused-expression
-export const addEpochCriteria = (startDate: Date | undefined, endDate: Date | undefined,
-                                 propertyName: string, operatorList: any[]): void =>
-                                 // tslint:disable-next-line: no-void-expression
-                                 addDateCriteria(startDate, endDate, propertyName, operatorList, true);
-
-/**
- * Adds an epoch criteria with the specified start and ned dates to the operatorlist.
- * This epoch search is precise, meaning that is not subject to the setBeginningOfNextDay and
- * setEndOfPreviousDay manipulations to normal date searches.
- */
-// tslint:disable: no-unsafe-any no-any
-// tslint:disable-next-line: no-unused-expression
-export const addPreciseDateCriteria = (startDate: Date | undefined, endDate: Date | undefined,
-                                       propertyName: string, operatorList: any[]): void =>
-  // tslint:disable-next-line: no-void-expression
-  addDateCriteria(startDate, endDate, propertyName, operatorList, false, true);
-
-  // tslint:disable-next-line: completed-docs
-export const convertStringPropertyToDate = (
-  searchCriteria: any,
-  datePropertyNames: string[]): void => {
-
-  datePropertyNames.forEach(propertyName => {
-    if (searchCriteria[propertyName] !== undefined && !(searchCriteria[propertyName] instanceof Date)) {
-      searchCriteria[propertyName] = new Date(searchCriteria[propertyName] as string);
-    }
-  });
-};
-
-// tslint:disable-next-line:completed-docs
-export function notEmpty<TValue>(value: TValue | null | undefined): value is TValue {
-  return value !== null && value !== undefined;
-}
-
-/**
- * Sleep for a while
- * https://stackoverflow.com/questions/37764665/typescript-sleep
- */
-export function delay(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms));
 }

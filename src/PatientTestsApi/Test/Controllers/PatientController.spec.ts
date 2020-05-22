@@ -7,12 +7,13 @@ import { BadRequestResponse } from "../../Models/BadRequestResponse";
 import { v4 as uuidv4 } from "uuid";
 import { PatientFixture } from "../Fixtures/PatientFixture";
 import { IAuditService } from "../../Services/IAuditService";
-import { IPatient } from "../../Models/IPatient";
+import { IPatient, IPatientSearch } from "../../Models/IPatient";
 import { DownstreamError } from "../../Models/DownstreamError";
 import * as HttpStatus from "http-status-codes";
 import { AuditingErrorResponse } from "../../Models/AuditingErrorResponse";
 import { NotFoundResponse } from "../../Models/NotFoundResponse";
 import { UpdateFailedError } from "../../Models/UpdateFailedError";
+import { isObjectEmpty } from "../../Util/Utils";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function createPatientRequest(body: any = PatientFixture.createPatientForCreatingInDb()): HttpRequest {
@@ -142,7 +143,7 @@ describe("PatientController", async function (): Promise<void> {
     const request = createEmptyRequest();
 
     // configure request
-    request.params["patientId"] = '0';
+    request.params["patientId"] = "0";
 
     // response
     when(dataServiceMock.findPatient(anything())).thenResolve(null);
@@ -280,6 +281,7 @@ describe("PatientController", async function (): Promise<void> {
     const dataServiceMock = mock<IPatientDataService>();
     const controller = createController(instance(dataServiceMock));
     const request = createEmptyRequest();
+    const mockSearchRequest = instance(mock<IPatientSearch>());
 
     // configure response
     const patients = [
@@ -289,9 +291,18 @@ describe("PatientController", async function (): Promise<void> {
     ];
 
     // response
-    when(dataServiceMock.searchPatient(anything())).thenResolve(patients);
+    request.body = mockSearchRequest;
+    when(dataServiceMock.searchPatient(mockSearchRequest)).thenResolve(patients);
     
+    // test
     const result = await controller.searchPatient(request);
+
+    // verify argument is correct
+    verify(dataServiceMock.searchPatient(mockSearchRequest)).once();
+    const [argument] = capture(dataServiceMock.searchPatient).last();
+    expect(argument).is.not.undefined;
+    expect(isObjectEmpty(argument)).to.be.true;
+
     const patientResults = result.body as IPatient[];
     expect(result.status).to.equal(HttpStatus.OK);
     expect(patientResults.length).to.equal(patients.length);

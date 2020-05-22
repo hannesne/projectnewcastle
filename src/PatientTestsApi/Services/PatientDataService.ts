@@ -3,7 +3,7 @@ import { IPatient, IPatientSearch } from "../Models/IPatient";
 import { ICollection } from "./ICollection";
 import { InsertFailedError } from "../Models/InsertFailedError";
 import { UpdateFailedError } from "../Models/UpdateFailedError";
-import { addDateCriteria, addPreciseDateCriteria, createSimpleCriteriaOperatorList, isObjectEmpty, removeUndefinedPropertiesFromObject } from '../Util/Utils';
+import { addDateCriteria, createSimpleCriteriaOperatorList, removeUndefinedPropertiesFromObject, removeDatabaseProperties } from '../Util/Utils';
 
 export class PatientDataService implements IPatientDataService {
   constructor (private readonly collection: ICollection) {
@@ -33,9 +33,7 @@ export class PatientDataService implements IPatientDataService {
 
     if (result) {
       // remove database properties
-      delete result._id;
-      delete result._shardKey;
-      delete result._dateOfBirthDate;
+      removeDatabaseProperties(result);
     }
 
     return result;
@@ -92,9 +90,7 @@ export class PatientDataService implements IPatientDataService {
     if (result) {
       result.forEach(x => {
         // remove database properties
-        delete x._id;
-        delete x._shardKey;
-        delete x._dateOfBirthDate;
+        removeDatabaseProperties(x);
 
         patients.push(x);
       });

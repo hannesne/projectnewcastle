@@ -40,7 +40,7 @@ export class LoggingCollection implements ICollection {
     filter: FilterQuery<any>, 
     update: UpdateQuery<any> | Partial<any>, options?: UpdateOneOptions
   ): Promise<UpdateWriteOpResult> {
-    const mongoRequest = JSON.stringify({updateOne: {filter}})
+    const mongoRequest = JSON.stringify({updateOne: {filter}});
     return this.trackDependency(() => this.collection.updateOne(filter, update, options), mongoRequest);
   }
 
