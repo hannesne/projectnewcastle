@@ -337,7 +337,7 @@ resource "azurerm_api_management_api_policy" "patient_policy" {
   <inbound>
     <base />
     <!-- Look for func-host-key in the cache -->
-    <cache-lookup-value key="${data.azurerm_key_vault_secret.fa_patient_api_host_key.version}" variable-name="funchostkey" />
+    <cache-lookup-value key="func-host-key-${data.azurerm_key_vault_secret.fa_patient_api_host_key.version}" variable-name="funchostkey" />
     <!-- If API Management doesn’t find it in the cache, make a request for it and store it -->
     <choose>
       <when condition="@(!context.Variables.ContainsKey("funchostkey"))">
@@ -350,7 +350,7 @@ resource "azurerm_api_management_api_policy" "patient_policy" {
         <!-- Store response body in context variable -->
         <set-variable name="funchostkey" value="@((string)((IResponse)context.Variables["coderesponse"]).Body.As<JObject>()["value"])" />
         <!-- Store result in cache -->
-        <cache-store-value key="${data.azurerm_key_vault_secret.fa_patient_api_host_key.version}" value="@((string)context.Variables["funchostkey"])" duration="100000" />
+        <cache-store-value key="func-host-key-${data.azurerm_key_vault_secret.fa_patient_api_host_key.version}" value="@((string)context.Variables["funchostkey"])" duration="100000" />
       </when>
     </choose>
     <set-header name="x-functions-key" exists-action="override">
