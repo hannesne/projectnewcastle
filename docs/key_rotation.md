@@ -22,7 +22,9 @@ You can perform these tasks manually in the Azure Portal, or you can use the Azu
 2. Update the secret: [az keyvault secret set](https://docs.microsoft.com/en-us/cli/azure/keyvault/secret?view=azure-cli-latest#az-keyvault-secret-set)
 3. Update the key vault reference in app settings: [az functionapp config appsettings set](https://docs.microsoft.com/en-us/cli/azure/functionapp/config/appsettings?view=azure-cli-latest#az-functionapp-config-appsettings-set)
 
-However, we don't want to do these tasks manually. Because we are using Terraform as IaC (Infrastructure as Code), we should maintain our configuraiton in Terraform, as far as possible. It's a bad practice if you mix Terraform and manual resource provisioning. So our solution is described below.
+However, we don't want to do these tasks manually due to following reasons.
+1. Because we are using Terraform as IaC (Infrastructure as Code), we should maintain our configuraiton in Terraform, as far as possible. It's a bad practice if you mix Terraform and manual resource provisioning.
+2. In our case, the key vault reference in app settings depends on the secret latest `id` and the secret `value` depends on the host key in function app. With Terraform you can refer these resources very easily and Terraform will maintain these resources based on their dependencies.
 
 ### Rotate the host key
 
@@ -116,6 +118,8 @@ resource "azurerm_key_vault_secret" "fa_patient_api_host_key" {
 
 If a secret in Key Vault is changed, a new `id` will be generated for the secret. Since Patient API caching policy refers to the key vault secret with the latest `id`, Terraform will update the reference in caching policy if the secret is updated with a new `id`.
 
+Since we cached the host key in API Management, the retired key may still exist in the cache, we need to find a way to remove it from cache or update it to the latest host key. We are using internal cache in API Management and there is no REST API to handle internal cache, so it's not easy to update or remove the cache. After trying some workarounds, a great idea came to our mind. Why not use the latest secret `version` as the cache name like this `key="${data.azurerm_key_vault_secret.fa_patient_api_host_key.version}"`? So if the host key is updated, the cache name will be updated as well which will raise a cache miss and force API Management to retrieve the latest host key in Key Vault. The idea can be implemented easily in Terraform like below.
+
 ```terraform
 data "azurerm_key_vault_secret" "fa_patient_api_host_key" {
   name         = azurerm_key_vault_secret.fa_patient_api_host_key.name
@@ -128,37 +132,24 @@ resource "azurerm_api_management_api_policy" "patient_policy" {
 <policies>
   <inbound>
     ...
-    <send-request ignore-error="false" timeout="20" response-variable-name="coderesponse" mode="new">
-      <set-url>${data.azurerm_key_vault_secret.fa_patient_api_host_key.id}?api-version=7.0</set-url>
-      <set-method>GET</set-method>
-      <authentication-managed-identity resource="https://vault.azure.net" />
-    </send-request>
-    ...
-  </inbound>
-</policies>
-XML
-}
-```
-
-Since we cached the host key in API Management, the retired key may still exist in the cache, we need to find a way to remove it from cache or update it to the latest host key. We are using internal cache in API Management, so it's not easy to remove the cache and there is no REST API to do that. We used a workaround to update the cached key if PatientTests API returns `401 Unauthorized` error.
-
-```terraform
-resource "azurerm_api_management_api_policy" "patient_policy" {
-  ...
-  xml_content = <<XML
-<policies>
-  <outbound>
+    <!-- Look for func-host-key in the cache -->
+    <cache-lookup-value key="${data.azurerm_key_vault_secret.fa_patient_api_host_key.version}" variable-name="funchostkey" />
+    <!-- If API Management doesn’t find it in the cache, make a request for it and store it -->
     <choose>
-      <when condition="@(context.Response.StatusCode == 401)">
+      <when condition="@(!context.Variables.ContainsKey("funchostkey"))">
+        <!-- Make HTTP request to get function host key -->
         <send-request ignore-error="false" timeout="20" response-variable-name="coderesponse" mode="new">
           <set-url>${data.azurerm_key_vault_secret.fa_patient_api_host_key.id}?api-version=7.0</set-url>
           <set-method>GET</set-method>
           <authentication-managed-identity resource="https://vault.azure.net" />
         </send-request>
-        <cache-store-value key="func-host-key" value="@((string)((IResponse)context.Variables["coderesponse"]).Body.As<JObject>()["value"])" duration="100000" />
+        <!-- Store response body in context variable -->
+        <set-variable name="funchostkey" value="@((string)((IResponse)context.Variables["coderesponse"]).Body.As<JObject>()["value"])" />
+        <!-- Store result in cache -->
+        <cache-store-value key="${data.azurerm_key_vault_secret.fa_patient_api_host_key.version}" value="@((string)context.Variables["funchostkey"])" duration="100000" />
       </when>
     </choose>
-  </outbound>
+  </inbound>
 </policies>
 XML
 }
