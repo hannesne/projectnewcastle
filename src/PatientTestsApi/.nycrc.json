@@ -5,7 +5,7 @@
   "functions": 0,
   "statements": 0,
   "check-coverage": true,
-  "exclude": [".ignore", "coverage"],
+  "exclude": [".ignore", ".coverage", "dist/Test"],
   "exclude-after-remap": false,
   "report-dir": "./.coverage/",
   "cache": false,
