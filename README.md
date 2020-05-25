@@ -1,7 +1,9 @@
 # Project Newcastle
+
 This repo contains a sample showcasing a key part of a recent customer engagement. We've distilled it down to the main technical lessons learned to serve as a scaffold for future work. The majority of business logic and detail related to data models have been removed to simplify the code; this extends to security and infrastructure elements.
 
 ## Scenario
+
 The organisation needs to digitally store the results of patient medical tests. Other internal and third-party systems will need to interface with this data via an API that allows reading and writing of the data. These interactions need to be recorded in an audit register. Access to the API needs to be managed by a system that allows for easy integration with different authentication mechanisms. APIs should not be publically accessible outside of a single managed endpoint. All code and infrastructure deployment should be automated.
 
 ## Solution Archtiecture
@@ -24,4 +26,4 @@ The [PatientTests API](./src/PatientTestsApi/readme.md) and the [Audit API](./sr
 
 Each of these three folders contain a dev container, which will have all the prerequisites installed, to help you get going quicker.
 
-The APIs are built using Typescript on Azure Functions. Both the PatientTests API and the Audit API have a full suite of automated integration and unit tests. This helps to prevent regressions when any changes are made. It is also set up to do linting using ESLint to maintain code styles and help guard against unintentional errors. The services' respective readme's contain information on how to run the tests and linting. 
+The APIs are built using Typescript on Azure Functions. Both the PatientTests API and the Audit API have a full suite of automated integration and unit tests. This helps to prevent regressions when any changes are made. It is also set up to do linting using ESLint to maintain code styles and help guard against unintentional errors. The services' respective readme's contain information on how to run the tests and linting.
