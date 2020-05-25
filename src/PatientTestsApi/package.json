@@ -7,8 +7,7 @@
     "build": "npx tsc -p ./tsconfig.json",
     "clean": "npx rimraf ./dist ./node_modules",
     "lint": "npx eslint . --ext .ts",
-    "cover": "cross-env NODE_ENV=test nyc --report lcovonly _mocha --timeout 30000 --config .mocharc.json 'dist/Test/**/*.spec.js'",
-    "report": "node yachr-report.js",
+    "cover": "nyc --report lcovonly _mocha --timeout 30000 --config .mocharc.json 'dist/Test/**/*.spec.js'",
     "build:production": "npm run clean && npm install && npm run build && npm prune --production"
   },
   "author": "",
@@ -27,7 +26,6 @@
     "axios-mock-adapter": "^1.18.1",
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
-    "cross-env": "^7.0.2",
     "eslint": "^6.8.0",
     "eslint-config-recommended": "^4.0.0",
     "eslint-plugin-import": "^2.20.2",
