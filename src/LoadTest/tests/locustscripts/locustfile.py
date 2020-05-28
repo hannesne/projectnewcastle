@@ -95,7 +95,7 @@ class LoadPatientLocust(FastHttpLocust):
 # Update patient
 def UpdatePatient(self, data):
     return self.client.put(
-        f"patient/{patient['id']}",
+        f"patient/{data['id']}",
         json.dumps(data),
         name = "patient/{ramdom_id}",
         headers = {
@@ -146,14 +146,11 @@ class SearchPatientTaskSet(TaskSet):
                     response.failure(f"Code: {response.status_code} | Content: {response.text} | Task: SearchPatientWithId")
     
     @task(1)
-    def SearchPatientWithDateOfBirth(self):
+    def SearchAllPatients(self):
         if Variables.patient_ids:
-            with SearchPatient(self, {
-                "dateOfBirthFrom": "1919-12-31",
-                "dateOfBirthTo": "2021-01-01"
-            }) as response:
+            with SearchPatient(self, {}) as response:
                 if response.status_code != 200:
-                    response.failure(f"Code: {response.status_code} | Content: {response.text} | Task: SearchPatientWithDateOfBirth")
+                    response.failure(f"Code: {response.status_code} | Content: {response.text} | Task: SearchAllPatients")
 
 class SearchPatientLocust(FastHttpLocust):
     wait_time = Variables.wait_time
@@ -178,7 +175,11 @@ class CreateTestTaskSet(TaskSet):
             random_id = random.choice(Variables.patient_ids)
             with CreateTest(self, GenerateRandomTest(random_id)) as response:
                 if response.status_code == 201:
-                    Variables.test_ids.append(json.loads(response.text)["id"])
+                    test = json.loads(response.text)
+                    Variables.patient_test_ids.append({
+                        "patientId": test["patientId"],
+                        "id": test["id"]
+                    })
                 else:
                     response.failure(f"Code: {response.status_code} | Content: {response.text} | Task: CreateValidTest")
 
@@ -194,6 +195,72 @@ class CreateTestLocust(FastHttpLocust):
     wait_time = Variables.wait_time
     task_set = CreateTestTaskSet
 
+# Load tests
+def LoadTests(self, id):
+    return self.client.get(
+        f"patient/{id}/tests/",
+        name = "patient/{random_id}/tests/",
+        headers = {
+            "Ocp-Apim-Subscription-Key": Variables.sub_key
+        },
+        catch_response = True
+    )
+
+class LoadTestsTaskSet(TaskSet):
+    @task(9)
+    def LoadTestsWithValidPatient(self):
+        if Variables.patient_test_ids:
+            test = random.choice(Variables.patient_test_ids)
+            with LoadTests(self, test["patientId"]) as response:
+                if response.status_code != 200:
+                    response.failure(f"Code: {response.status_code} | Content: {response.text} | Task: LoadTestsWithValidPatient")
+
+    @task(1)
+    def LoadTestsWithInvalidPatient(self):
+        with LoadTests(self, "1") as response:
+            if response.status_code == 404:
+                response.success()
+            else:
+                response.failure(f"Code: {response.status_code} | Content: {response.text} | Task: LoadTestsWithInvalidPatient")
+
+class LoadTestsLocust(FastHttpLocust):
+    wait_time = Variables.wait_time
+    task_set = LoadTestsTaskSet
+
+# Load test
+def LoadTest(self, pid, tid):
+    return self.client.get(
+        f"patient/{pid}/tests/{tid}",
+        name = "patient/{random_pid}/tests/{random_tid}",
+        headers = {
+            "Ocp-Apim-Subscription-Key": Variables.sub_key
+        },
+        catch_response = True
+    )
+
+class LoadTestTaskSet(TaskSet):
+    @task(9)
+    def LoadTestWithValidTest(self):
+        if Variables.patient_test_ids:
+            test = random.choice(Variables.patient_test_ids)
+            with LoadTest(self, test["patientId"], test["id"]) as response:
+                if response.status_code != 200:
+                    response.failure(f"Code: {response.status_code} | Content: {response.text} | Task: LoadTestWithValidTest")
+
+    @task(1)
+    def LoadTestWithInvalidTest(self):
+        if Variables.patient_test_ids:
+            test = random.choice(Variables.patient_test_ids)
+            with LoadTest(self, test["patientId"], "1") as response:
+                if response.status_code == 404:
+                    response.success()
+                else:
+                    response.failure(f"Code: {response.status_code} | Content: {response.text} | Task: LoadTestWithInvalidTest")
+
+class LoadTestLocust(FastHttpLocust):
+    wait_time = Variables.wait_time
+    task_set = LoadTestTaskSet
+
 # All
 class AllTaskSet(TaskSet):
     tasks = {
@@ -202,7 +269,9 @@ class AllTaskSet(TaskSet):
         LoadPatientTaskSet: 1,
         UpdatePatientTaskSet: 1,
         SearchPatientTaskSet: 1,
-        CreateTestTaskSet: 1
+        CreateTestTaskSet: 1,
+        LoadTestsTaskSet: 1,
+        LoadTestTaskSet: 1
     }
 
     @task

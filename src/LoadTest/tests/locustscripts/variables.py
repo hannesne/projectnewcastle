@@ -8,7 +8,7 @@ class Variables:
     sub_key = ""
     wait_time = between(1, 5)
     patient_ids = []
-    test_ids = []
+    patient_test_ids = []
 
 def randomString(stringLength = 6):
     letters = string.ascii_uppercase
