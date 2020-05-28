@@ -1,1 +1,1 @@
-from locustscripts.locustfile import EchoLocust
+from locustscripts.locustfile import AllLocust
