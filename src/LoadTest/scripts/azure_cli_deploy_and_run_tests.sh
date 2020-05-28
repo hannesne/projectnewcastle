@@ -9,7 +9,7 @@ UNIQUE=$(cat /dev/urandom | tr -dc 'a-z0-9' | fold -w 8 | head -n 1)
 # Locust test details. How many clients to simulate, etc.
 # LOCUST_WORKER_COUNT and "--expect-slaves" must be the same
 LOCUST_TARGET_HOST=""
-LOCUST_MASTER_CONFIG="--no-web --expect-slaves 10 --clients 200 --hatch-rate 20 --run-time 2m --csv /locust-results/results --loglevel INFO"
+LOCUST_MASTER_CONFIG="--no-web --expect-slaves 10 --clients 100 --hatch-rate 10 --run-time 1m --csv /locust-results/results --loglevel INFO"
 LOCUST_WORKER_COUNT=10
 
 # Service principal 
