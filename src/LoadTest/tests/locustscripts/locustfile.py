@@ -1,7 +1,7 @@
 import random
 import json
 
-from locust import TaskSet, task, between, TaskSequence, seq_task
+from locust import TaskSet, task
 from locust.contrib.fasthttp import FastHttpLocust
 
 from .variables import Variables, GenerateRandomPatient, GenerateRandomTest
